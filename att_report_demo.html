@@ -1,0 +1,1813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Merchant One AI Report | Klook — ATT (Stage 1:1 Demo)</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          klook: {
+            orange: '#ff5b00',
+            purple: '#4d40cc',
+            cyan: '#00cbd1',
+            'dark-yellow': '#ffc200',
+            indigo: '#2e2ead',
+            'light-purple': '#887bf1',
+            'dark-cyan': '#00afaf',
+            grey: '#212121',
+            light: '#f9fafb'
+          }
+        }
+      }
+    }
+  }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<style>
+  body { background-color: #f3f4f6; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: #212121; }
+  .chart-container { height: 320px; width: 100%; }
+  .chart-container-sm { height: 260px; width: 100%; }
+  .chart-container-md { height: 280px; width: 100%; }
+  .filter-label { font-size: 11px; color: #9ca3af; white-space: nowrap; font-weight: 600; margin-bottom: 4px; display: block; text-transform: uppercase; }
+  .filter-input { border: 1px solid #e5e7eb; border-radius: 4px; padding: 5px 9px; font-size: 12px; color: #374151; outline: none; transition: border-color 0.2s; background-color: white; height: 30px; box-sizing: border-box; }
+  .filter-input:focus { border-color: #ff5b00; }
+  .tg { display: inline-flex; border: 1px solid #e5e7eb; border-radius: 6px; overflow: hidden; height: 30px; }
+  .tg-btn { padding: 0 11px; font-size: 11px; font-weight: 600; cursor: pointer; color: #888; background: white; border: none; border-right: 1px solid #e5e7eb; transition: all .15s; white-space: nowrap; height: 100%; display: flex; align-items: center; }
+  .tg-btn:last-child { border-right: none; }
+  .tg-btn.active { background: #ff5b00; color: white; }
+  .tg-btn:hover:not(.active) { background: #fff3e0; color: #ff5b00; }
+  .ms-wrap { position: relative; }
+  .ms-trigger { border: 1px solid #e5e7eb; border-radius: 4px; padding: 0 9px; font-size: 12px; color: #374151; background: white; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 6px; min-width: 150px; max-width: 210px; height: 30px; }
+  .ms-trigger::after { content: '▼'; font-size: 8px; color: #bbb; flex-shrink: 0; }
+  .ms-trigger.purple-border { border-color: #4d40cc; }
+  .ms-dropdown { display: none; position: absolute; top: calc(100% + 4px); left: 0; min-width: 220px; background: white; border: 1px solid #e5e7eb; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,.12); z-index: 9999; padding: 6px 0; max-height: 260px; overflow-y: auto; }
+  .ms-dropdown.open { display: block; }
+  .ms-search { padding: 6px 10px; border-bottom: 1px solid #f0f0f0; }
+  .ms-search input { width: 100%; border: 1px solid #e5e7eb; border-radius: 4px; padding: 4px 8px; font-size: 11px; outline: none; }
+  .ms-item { display: flex; align-items: center; gap: 8px; padding: 5px 12px; cursor: pointer; font-size: 11px; transition: background .1s; user-select: none; }
+  .ms-item:hover { background: #fff3e0; }
+  .ms-item input[type=checkbox] { cursor: pointer; accent-color: #ff5b00; flex-shrink: 0; }
+  .ms-divider { height: 1px; background: #f0f0f0; margin: 4px 0; }
+  .ms-badge { margin-left: auto; font-size: 9px; color: #9ca3af; background: #f3f4f6; border-radius: 8px; padding: 1px 6px; }
+  .pkg-dd-wrap { position: relative; flex-shrink: 0; }
+  .pkg-dd-btn { border: 1px solid #e5e7eb; border-radius: 4px; padding: 4px 10px; font-size: 11px; color: #555; background: white; cursor: pointer; display: flex; align-items: center; gap: 5px; white-space: nowrap; }
+  .pkg-dd-btn::after { content: ' ▼'; font-size: 8px; color: #bbb; }
+  .pkg-dd-menu { display: none; position: absolute; right: 0; top: calc(100% + 4px); min-width: 200px; background: white; border: 1px solid #e5e7eb; border-radius: 8px; box-shadow: 0 4px 14px rgba(0,0,0,.1); z-index: 500; padding: 4px 0; }
+  .pkg-dd-menu.open { display: block; }
+  .pkg-dd-item { display: flex; align-items: center; gap: 8px; padding: 5px 12px; cursor: pointer; font-size: 11px; user-select: none; }
+  .pkg-dd-item:hover { background: #f9fafb; }
+  .pkg-dd-item input { cursor: pointer; accent-color: #4d40cc; flex-shrink: 0; }
+  .kpi-card { background: white; border-radius: 8px; padding: 14px 16px; box-shadow: 0 1px 3px rgba(0,0,0,.07); border-top: 3px solid #eee; }
+  .badge { font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 8px; }
+  .badge-up { background: #e8f5e9; color: #2e7d32; }
+  .badge-dn { background: #ffebee; color: #c62828; }
+  .badge-nu { background: #e3f2fd; color: #1565c0; }
+  .rpt-tbl { width: 100%; border-collapse: collapse; font-size: 11px; }
+  .rpt-tbl th { font-size: 10px; color: #9ca3af; text-transform: uppercase; letter-spacing: .4px; padding: 5px 8px; text-align: left; border-bottom: 1px solid #f0f0f0; white-space: nowrap; }
+  .rpt-tbl td { padding: 6px 8px; border-bottom: 1px solid #f8f8f8; vertical-align: middle; }
+  .rpt-tbl tr:last-child td { border-bottom: none; }
+  .rpt-tbl tbody tr:hover td { background: #fafafa; }
+  .activity-header { background: #f5f5f5; cursor: pointer; }
+  .activity-header td { font-weight: 700; border-bottom: 1px solid #e5e5e5; }
+  .activity-header:hover td { background: #ebebeb; }
+  .activity-toggle { display: inline-block; transition: transform 0.2s; margin-right: 4px; font-size: 10px; }
+  .activity-header.collapsed .activity-toggle { transform: rotate(-90deg); }
+  .activity-child { display: table-row; }
+  .activity-child.hidden { display: none; }
+  .activity-child td { background: #fafafa; border-bottom: 1px solid #ececec; }
+  .activity-child:hover td { background: #f0f0f0; }
+  .tp { font-size: 10px; padding: 2px 7px; border-radius: 8px; font-weight: 600; white-space: nowrap; }
+  .tp-ok { background: #e8f5e9; color: #2e7d32; }
+  .tp-wn { background: #fff3e0; color: #e65100; }
+  .tp-bd { background: #ffebee; color: #c62828; }
+  .bool-true { color: #22c55e; font-weight: 600; }
+  .bool-false { color: #bbb; }
+  .action-item { display: flex; gap: 10px; background: #fafafa; border-radius: 8px; padding: 10px 12px; border-left: 3px solid; margin-bottom: 8px; }
+  .action-item:last-child { margin-bottom: 0; }
+  .action-p0 { border-color: #f44336; }
+  .action-p1 { border-color: #ff9800; }
+  .action-p2 { border-color: #eab308; }
+  .atag { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 8px; margin-top: 3px; display: inline-block; }
+  .atag-rd { background: #fce4ec; color: #c62828; }
+  .atag-or { background: #fff3e0; color: #e65100; }
+  .atag-yl { background: #fef9c3; color: #854d0e; }
+  body.no-comp .comp-col, body.no-comp .comp-row { display: none !important; }
+  .sec-hd { font-size: 13px; font-weight: 700; color: #374151; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; padding-left: 10px; border-left: 4px solid #ff5b00; }
+  .sec-hd-purple { border-left-color: #4d40cc; }
+  .filter-row-label { width: 70px; text-align: right; padding-right: 15px; font-size: 11px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 8px; }
+  .info-icon { display:inline-flex; align-items:center; justify-content:center; width:13px; height:13px; border-radius:50%; background:#e5e7eb; color:#6b7280; font-size:9px; font-weight:700; cursor:help; margin-left:4px; }
+  /* Global AI Insights card */
+  .gi-card { background:white; border-radius:10px; box-shadow:0 1px 4px rgba(0,0,0,0.08); margin-bottom:20px; overflow:hidden; border:1px solid #f3f4f6; }
+  .gi-header { display:flex; align-items:center; justify-content:space-between; padding:14px 16px; border-bottom:1px solid #f3f4f6; }
+  .gi-body { padding:16px; }
+  .gi-overall { margin:0 0 12px 0; font-size:12px; color:#374151; line-height:1.7; padding:10px 14px; background:#f9fafb; border-radius:6px; border-left:3px solid #e5e7eb; }
+  .gi-item { padding:12px 0; border-bottom:1px solid #f3f4f6; }
+  .gi-item:last-child { border-bottom:none; padding-bottom:0; }
+  .gi-item-head { display:flex; align-items:flex-start; gap:8px; margin-bottom:5px; }
+  .gi-pill { font-size:9px; font-weight:700; border-radius:3px; padding:2px 6px; letter-spacing:.3px; flex-shrink:0; margin-top:2px; }
+  .gi-pill-p0 { background:#fee2e2; color:#b91c1c; }
+  .gi-pill-p1 { background:#fef3c7; color:#92400e; }
+  .gi-pill-p2 { background:#f3f4f6; color:#4b5563; }
+  .gi-item-title { font-size:12px; color:#111827; line-height:1.5; }
+  .gi-item-body { margin:0 0 5px 0; font-size:12px; color:#374151; line-height:1.6; }
+  .gi-item-action { margin:0; font-size:11px; color:#6b7280; line-height:1.5; }
+  .gi-regen-btn { font-size:11px; color:#374151; background:white; border:1px solid #e5e7eb; border-radius:4px; padding:3px 10px; cursor:pointer; }
+  /* Review insights period blocks */
+  .period-block { background:#f9fafb; border-radius:8px; padding:12px 14px; margin-bottom:10px; border:1px solid #f0f0f0; }
+  .period-block.baseline { background:#fffbf7; border:1px dashed #ff5b00; }
+  .period-block:last-child { margin-bottom:0; }
+  .period-block-title { font-size:11px; font-weight:700; color:#374151; text-transform:uppercase; letter-spacing:.4px; }
+  .period-block.baseline .period-block-title { color:#ff5b00; }
+  .period-block-sub { font-size:10px; color:#9ca3af; margin-bottom:8px; }
+  .kpi-mini-row { display:flex; gap:16px; flex-wrap:wrap; }
+  .kpi-mini { min-width:70px; }
+  .kpi-mini-label { font-size:9px; color:#9ca3af; text-transform:uppercase; letter-spacing:.3px; margin-bottom:2px; }
+  .kpi-mini-val { font-size:15px; font-weight:700; color:#212121; }
+  .star-row { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+  .star-row:last-child { margin-bottom:0; }
+  .star-label { width:28px; font-size:11px; color:#6b7280; flex-shrink:0; }
+  .star-bar-bg { flex:1; height:10px; background:#f0f0f0; border-radius:6px; overflow:hidden; }
+  .star-bar-fill { height:100%; border-radius:6px; }
+  .star-pct { width:36px; font-size:11px; color:#374151; text-align:right; flex-shrink:0; }
+  /* Supply inventory / stat cards */
+  .stat-card { border-radius:8px; padding:12px 14px; flex:1; min-width:140px; }
+  .stat-card-label { font-size:10px; color:#9ca3af; text-transform:uppercase; letter-spacing:.3px; margin-bottom:4px; }
+  .stat-card-val { font-size:20px; font-weight:700; }
+  .stat-card-sub { font-size:10px; color:#9ca3af; margin-top:2px; }
+  .stat-card-lg { border-radius:8px; padding:28px 16px; flex:1; text-align:center; }
+  .stat-card-lg .stat-card-val-lg { font-size:36px; font-weight:800; line-height:1.15; margin-bottom:8px; }
+  .stat-card-lg .stat-card-label-lg { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.4px; color:#6b7280; }
+  .inv-tbl th:not(:first-child), .inv-tbl td:not(:first-child) { text-align:right; }
+  .status-plain { font-weight:600; white-space:nowrap; }
+  .status-plain.extend { color:#f59e0b; }
+  .status-plain.ok { color:#22c55e; }
+  /* TopN stepper */
+  .stepper { display:flex; align-items:center; gap:5px; border:1px solid #e5e7eb; border-radius:4px; padding:2px 4px; height:30px; box-sizing:border-box; }
+  .stepper input { width:28px; text-align:center; border:none; outline:none; font-size:12px; }
+  .stepper button { width:16px; height:16px; border:1px solid #e5e7eb; border-radius:3px; background:#f9fafb; font-size:10px; line-height:1; cursor:pointer; color:#555; }
+  .stepper button:hover { background:#fff3e0; color:#ff5b00; }
+  .gran-select { border:1px solid #e5e7eb; border-radius:4px; padding:0 8px; font-size:11px; height:30px; background:white; color:#374151; }
+  .continued-hdr { background:#f0f4ff !important; border-left:2px dashed #93c5fd; }
+  /* AI Review Insights — guest-love / want-improved two-column layout */
+  .ari-cols { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .ari-col-hd { display:flex; justify-content:space-between; align-items:center; padding:8px 12px; border-radius:6px; font-size:12px; font-weight:700; margin-bottom:10px; }
+  .ari-col-hd.love { background:#ecfdf5; color:#065f46; }
+  .ari-col-hd.improve { background:#fff7ed; color:#9a3412; }
+  .ari-theme-pill { font-size:10px; font-weight:700; padding:2px 8px; border-radius:10px; }
+  .ari-theme-pill.love { background:#065f46; color:white; }
+  .ari-theme-pill.improve { background:#9a3412; color:white; }
+  .ari-theme { padding:12px 0; border-bottom:1px solid #f3f4f6; }
+  .ari-theme:last-child { border-bottom:none; }
+  .ari-theme-title { font-size:12px; font-weight:700; color:#111827; margin-bottom:6px; }
+  .ari-stat-pill { display:inline-block; font-size:10px; font-weight:600; padding:2px 8px; border-radius:10px; margin-bottom:6px; }
+  .ari-stat-pill.love { background:#d1fae5; color:#065f46; }
+  .ari-stat-pill.improve { background:#ffedd5; color:#9a3412; }
+  .ari-quote { font-size:11px; font-style:italic; color:#6b7280; margin-bottom:4px; line-height:1.5; }
+  .ari-action-label { font-size:9px; font-weight:700; color:#9ca3af; text-transform:uppercase; letter-spacing:.3px; margin:6px 0 3px; }
+  .ari-action-box { font-size:11px; line-height:1.5; padding:8px 10px; border-radius:4px; margin-bottom:6px; }
+  .ari-action-box.love { background:#f0fdf4; border-left:3px solid #22c55e; color:#166534; }
+  .ari-action-box.improve { background:#fff7ed; border-left:3px solid #f97316; color:#9a3412; }
+  @keyframes dotPulse { 0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); } 40% { opacity: 1; transform: scale(1.1); } }
+  @keyframes progressSlide { 0% { transform: translateX(-100%); } 50% { transform: translateX(150%); } 100% { transform: translateX(400%); } }
+  @media print {
+    body { background: white; }
+    .no-print { display: none !important; }
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  }
+</style>
+</head>
+<body class="p-5">
+
+<div class="flex justify-between items-center mb-5 bg-white p-4 rounded-lg shadow-sm border-l-4 border-klook-orange no-print">
+  <div class="flex items-center gap-3">
+    <div class="bg-klook-orange text-white font-bold text-lg px-3 py-1 rounded">✦ klook</div>
+    <h1 class="text-xl font-bold text-klook-grey">Merchant One AI Report - ATT</h1>
+  </div>
+  <div class="flex items-center gap-3">
+    <button onclick="alert('Opens a Lark feedback form in a new tab (demo — link disabled).')" title="Share feedback about this report" class="bg-white border border-gray-200 text-gray-600 hover:border-klook-orange hover:text-klook-orange font-medium py-2 px-3 rounded text-sm transition flex items-center gap-2">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+      Send Feedback
+    </button>
+    <button onclick="openExportModal()" class="bg-klook-orange hover:bg-orange-700 text-white font-medium py-2 px-4 rounded text-sm transition flex items-center gap-2">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+        <polyline points="14 2 14 8 20 8"></polyline>
+        <line x1="12" y1="18" x2="12" y2="12"></line>
+        <polyline points="9 15 12 18 15 15"></polyline>
+      </svg>
+      Export PDF
+    </button>
+  </div>
+</div>
+
+<div class="bg-white p-5 rounded-lg shadow-sm mb-5 no-print">
+  <h2 class="text-base font-semibold text-klook-grey border-b pb-3 mb-4">Global Filters</h2>
+
+  <div id="filterRows" class="flex flex-col gap-5">
+
+    <div class="flex items-start">
+      <div class="filter-row-label">FILTERS</div>
+      <div class="flex flex-wrap gap-4 flex-1">
+        <div>
+          <span class="filter-label">Merchant Group</span>
+          <div class="ms-wrap">
+            <div class="ms-trigger purple-border" onclick="toggleMs('mgroup-dd')"><span id="mgroup-label" class="truncate">All Merchant Groups</span></div>
+            <div class="ms-dropdown" id="mgroup-dd">
+              <div class="ms-search"><input type="text" placeholder="Search merchant groups…" oninput="filterMsSearch(this,'mgroup-dd')"></div>
+              <div class="ms-item" onclick="toggleMsAll(event,'mgroup-dd','mgroup-cb','mg-all','mgroup-label')"><input type="checkbox" id="mg-all" checked> All Merchant Groups</div>
+              <div class="ms-divider"></div>
+              <div class="ms-item" onclick="toggleMsItem(event,this,'mgroup-cb','mg-all','mgroup-label')"><input type="checkbox" class="mgroup-cb" value="EMEA Theme Parks" checked><span>EMEA Theme Parks</span></div>
+              <div class="ms-item" onclick="toggleMsItem(event,this,'mgroup-cb','mg-all','mgroup-label')"><input type="checkbox" class="mgroup-cb" value="APAC OTA Partners" checked><span>APAC OTA Partners</span></div>
+              <div class="ms-divider"></div>
+              <div class="ms-item" onclick="toggleMsItem(event,this,'mgroup-cb','mg-all','mgroup-label')"><input type="checkbox" class="mgroup-cb" value="— Not grouped —" checked><span>— Not grouped —</span><span class="ms-badge">1 merchant</span></div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <span class="filter-label">Merchant</span>
+          <div class="ms-wrap">
+            <div class="ms-trigger purple-border" onclick="toggleMs('merchant-dd')"><span id="merchant-label" class="truncate">4 selected</span></div>
+            <div class="ms-dropdown" id="merchant-dd">
+              <div class="ms-search"><input type="text" placeholder="Search merchants…" oninput="filterMsSearch(this,'merchant-dd')"></div>
+              <div class="ms-item" onclick="toggleMsAll(event,'merchant-dd','merchant-cb','mc-all','merchant-label')"><input type="checkbox" id="mc-all"> All Merchants</div>
+              <div class="ms-divider"></div>
+              <div class="ms-item" onclick="toggleMsItem(event,this,'merchant-cb','mc-all','merchant-label')"><input type="checkbox" class="merchant-cb" value="655 - Euro Disney" checked><span>655 - Euro Disney</span></div>
+              <div class="ms-item" onclick="toggleMsItem(event,this,'merchant-cb','mc-all','merchant-label')"><input type="checkbox" class="merchant-cb" value="32192 - Magic Ways" checked><span>32192 - Magic Ways</span></div>
+              <div class="ms-item" onclick="toggleMsItem(event,this,'merchant-cb','mc-all','merchant-label')"><input type="checkbox" class="merchant-cb" value="14995 - Uber Formosa" checked><span>14995 - Uber Formosa</span></div>
+              <div class="ms-item" onclick="toggleMsItem(event,this,'merchant-cb','mc-all','merchant-label')"><input type="checkbox" class="merchant-cb" value="21808 - Tiqets Int'l" checked><span>21808 - Tiqets Int'l</span></div>
+              <div class="ms-item" onclick="toggleMsItem(event,this,'merchant-cb','mc-all','merchant-label')"><input type="checkbox" class="merchant-cb" value="45210 - City Wonders"><span>45210 - City Wonders</span></div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <span class="filter-label">Activity</span>
+          <div class="ms-wrap">
+            <div class="ms-trigger purple-border" onclick="toggleMs('activity-dd')"><span id="activity-label" class="truncate">3969 - Disneyland Paris</span></div>
+            <div class="ms-dropdown" id="activity-dd">
+              <div class="ms-search"><input type="text" placeholder="Search activities…" oninput="filterMsSearch(this,'activity-dd')"></div>
+              <div class="ms-item" onclick="toggleMsAll(event,'activity-dd','activity-cb','ac-all','activity-label')"><input type="checkbox" id="ac-all"> All Activities</div>
+              <div class="ms-divider"></div>
+              <div class="ms-item" onclick="toggleMsItem(event,this,'activity-cb','ac-all','activity-label')"><input type="checkbox" class="activity-cb" value="3969 - Disneyland Paris" checked><span>3969 - Disneyland Paris</span></div>
+              <div class="ms-item" onclick="toggleMsItem(event,this,'activity-cb','ac-all','activity-label')"><input type="checkbox" class="activity-cb" value="AD8001 - Private City Tour"><span>AD8001 - Private City Tour</span></div>
+              <div class="ms-item" onclick="toggleMsItem(event,this,'activity-cb','ac-all','activity-label')"><input type="checkbox" class="activity-cb" value="41352 - Blue Mountains Tour"><span>41352 - Blue Mountains Tour</span></div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <span class="filter-label">Comp Set</span>
+          <select class="filter-input" id="sel-compset">
+            <option selected>BU Level 1</option><option>BU Level 2</option><option>BU Level 3</option>
+          </select>
+        </div>
+        <div>
+          <span class="filter-label">Show Comp Set</span>
+          <div class="tg" id="tg-showcomp">
+            <button class="tg-btn active" onclick="setTG(this,'tg-showcomp')">Show</button>
+            <button class="tg-btn" onclick="setTG(this,'tg-showcomp')">Hide</button>
+          </div>
+        </div>
+        <div>
+          <span class="filter-label">User Origin</span>
+          <div class="ms-wrap">
+            <div class="ms-trigger" onclick="toggleMs('orig-dd')"><span id="origin-label" class="truncate">All Origins</span></div>
+            <div class="ms-dropdown" id="orig-dd">
+              <div class="ms-search"><input type="text" placeholder="Search…" oninput="filterMsSearch(this,'orig-dd')"></div>
+              <div class="ms-item" onclick="toggleMsAll(event,'orig-dd','orig-cb','oc-all','origin-label')"><input type="checkbox" id="oc-all"> <strong>Select All</strong></div>
+              <div class="ms-divider"></div>
+              <div class="ms-item" onclick="toggleMsItem(event,this,'orig-cb','oc-all','origin-label')"><input type="checkbox" class="orig-cb" value="Americas"><span>Americas</span></div>
+              <div class="ms-item" onclick="toggleMsItem(event,this,'orig-cb','oc-all','origin-label')"><input type="checkbox" class="orig-cb" value="Europe"><span>Europe</span></div>
+              <div class="ms-item" onclick="toggleMsItem(event,this,'orig-cb','oc-all','origin-label')"><input type="checkbox" class="orig-cb" value="HK & Macau"><span>HK & Macau</span></div>
+              <div class="ms-item" onclick="toggleMsItem(event,this,'orig-cb','oc-all','origin-label')"><input type="checkbox" class="orig-cb" value="India"><span>India</span></div>
+              <div class="ms-item" onclick="toggleMsItem(event,this,'orig-cb','oc-all','origin-label')"><input type="checkbox" class="orig-cb" value="Indonesia"><span>Indonesia</span></div>
+              <div class="ms-item" onclick="toggleMsItem(event,this,'orig-cb','oc-all','origin-label')"><input type="checkbox" class="orig-cb" value="Japan"><span>Japan</span></div>
+              <div class="ms-item" onclick="toggleMsItem(event,this,'orig-cb','oc-all','origin-label')"><input type="checkbox" class="orig-cb" value="Mainland China"><span>Mainland China</span></div>
+              <div class="ms-item" onclick="toggleMsItem(event,this,'orig-cb','oc-all','origin-label')"><input type="checkbox" class="orig-cb" value="Malaysia"><span>Malaysia</span></div>
+              <div class="ms-item" onclick="toggleMsItem(event,this,'orig-cb','oc-all','origin-label')"><input type="checkbox" class="orig-cb" value="Middle East"><span>Middle East</span></div>
+              <div class="ms-item" onclick="toggleMsItem(event,this,'orig-cb','oc-all','origin-label')"><input type="checkbox" class="orig-cb" value="Oceania"><span>Oceania</span></div>
+              <div class="ms-item" onclick="toggleMsItem(event,this,'orig-cb','oc-all','origin-label')"><input type="checkbox" class="orig-cb" value="Philippines"><span>Philippines</span></div>
+              <div class="ms-item" onclick="toggleMsItem(event,this,'orig-cb','oc-all','origin-label')"><input type="checkbox" class="orig-cb" value="RoW"><span>RoW</span></div>
+              <div class="ms-item" onclick="toggleMsItem(event,this,'orig-cb','oc-all','origin-label')"><input type="checkbox" class="orig-cb" value="Singapore"><span>Singapore</span></div>
+              <div class="ms-item" onclick="toggleMsItem(event,this,'orig-cb','oc-all','origin-label')"><input type="checkbox" class="orig-cb" value="South Korea"><span>South Korea</span></div>
+              <div class="ms-item" onclick="toggleMsItem(event,this,'orig-cb','oc-all','origin-label')"><input type="checkbox" class="orig-cb" value="Taiwan"><span>Taiwan</span></div>
+              <div class="ms-item" onclick="toggleMsItem(event,this,'orig-cb','oc-all','origin-label')"><input type="checkbox" class="orig-cb" value="Thailand"><span>Thailand</span></div>
+              <div class="ms-item" onclick="toggleMsItem(event,this,'orig-cb','oc-all','origin-label')"><input type="checkbox" class="orig-cb" value="United Kingdom"><span>United Kingdom</span></div>
+              <div class="ms-item" onclick="toggleMsItem(event,this,'orig-cb','oc-all','origin-label')"><input type="checkbox" class="orig-cb" value="Vietnam"><span>Vietnam</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex items-start">
+      <div class="filter-row-label">PERIOD</div>
+      <div class="flex flex-wrap gap-4 flex-1 items-start">
+        <div>
+          <span class="filter-label">Date Basis</span>
+          <div class="tg" id="tg-basis">
+            <button class="tg-btn active" onclick="setTG(this,'tg-basis')">Booking Date</button>
+            <button class="tg-btn" onclick="setTG(this,'tg-basis')">Participation Date</button>
+          </div>
+        </div>
+        <div>
+          <span class="filter-label">From</span>
+          <input type="date" class="filter-input" id="dt-from" value="2026-01-01">
+        </div>
+        <div>
+          <span class="filter-label">To</span>
+          <input type="date" class="filter-input" id="dt-to" value="2026-07-27">
+        </div>
+        <div>
+          <span class="filter-label">Comparison</span>
+          <div class="tg" id="tg-comp">
+            <button class="tg-btn active" onclick="setTG(this,'tg-comp')">YoY</button>
+            <button class="tg-btn" onclick="setTG(this,'tg-comp')">PoP</button>
+          </div>
+        </div>
+        <div class="w-px h-8 bg-gray-200 self-center mt-4"></div>
+        <div class="filter-row-label" style="margin-top:8px">METRICS</div>
+        <div>
+          <span class="filter-label">Sales &amp; Unit Basis</span>
+          <div class="tg" id="tg-metric">
+            <button class="tg-btn active" onclick="setTG(this,'tg-metric')">Net</button>
+            <button class="tg-btn" onclick="setTG(this,'tg-metric')">Gross</button>
+          </div>
+        </div>
+        <div>
+          <span class="filter-label">Currency</span>
+          <div class="tg" id="tg-currency">
+            <button class="tg-btn active" onclick="setTG(this,'tg-currency')">Local</button>
+            <button class="tg-btn" onclick="setTG(this,'tg-currency')">USD</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-orange-50/40 rounded-lg p-3 flex flex-col gap-2" style="background:#fffbf7;border:1px solid #fef0e6">
+      <div class="flex items-center gap-2 flex-wrap text-xs">
+        <span class="text-klook-orange font-semibold">Selected Merchant:</span>
+        <span class="bg-white border border-gray-200 rounded-full px-2 py-0.5 text-gray-600">655 - Euro Disney</span>
+        <span class="bg-white border border-gray-200 rounded-full px-2 py-0.5 text-gray-600">32192 - Magic Ways</span>
+        <span class="bg-white border border-gray-200 rounded-full px-2 py-0.5 text-gray-600">14995 - Uber Formosa</span>
+        <span class="text-gray-400">+1 more</span>
+        <button class="text-klook-orange font-medium hover:underline">show more →</button>
+      </div>
+      <div class="flex items-center gap-2 text-xs flex-wrap">
+        <span class="text-gray-500">Currency:</span>
+        <span class="bg-gray-100 text-gray-600 rounded-full px-2 py-0.5 font-medium">USD</span>
+        <span class="text-amber-600">⚠️ — selected merchants use multiple currencies (EUR, TWD, JPY +1 more)</span>
+      </div>
+    </div>
+
+    <div class="flex justify-end gap-3 mt-1">
+      <button onclick="window.location.reload()" class="bg-white border border-gray-200 text-gray-600 hover:border-klook-orange hover:text-klook-orange font-medium py-1.5 px-6 rounded text-sm transition">Reset</button>
+      <button onclick="applyFilters()" class="bg-klook-orange hover:bg-orange-700 text-white font-medium py-1.5 px-6 rounded text-sm transition">Apply Filters</button>
+    </div>
+
+  </div>
+</div>
+
+<div id="reportBody">
+
+  <!-- Global AI Insights -->
+  <div class="gi-card">
+    <div class="gi-header">
+      <div class="text-sm font-bold text-gray-700 flex items-center gap-2">✨ Global AI Insights</div>
+      <button class="gi-regen-btn" id="gi-regen-btn" style="display:none" onclick="generateGlobalInsights(true)">Regenerate</button>
+    </div>
+    <div class="gi-body">
+
+      <!-- State 1: not generated (default — matches live dashboard on load) -->
+      <div id="gi-empty" style="display:flex;flex-direction:column;align-items:center;padding:32px 16px;gap:12px;background:#f9fafb;border-radius:8px">
+        <div style="width:52px;height:52px;border-radius:50%;background:#FFF7EF;border:1px solid #FDE7D6;display:flex;align-items:center;justify-content:center;font-size:22px;color:#FF6512">☆</div>
+        <p style="margin:0;font-size:13px;color:#374151;font-weight:500">Global insights not generated yet</p>
+        <button onclick="generateGlobalInsights(false)" style="background:#FF6512;color:white;border:none;border-radius:20px;padding:9px 24px;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:0.2px">Generate Global Insights</button>
+      </div>
+
+      <!-- State 2: generating -->
+      <div id="gi-loading" style="display:none;flex-direction:column;align-items:center;padding:32px 16px;gap:12px;background:#f9fafb;border-radius:8px">
+        <div style="display:flex;gap:6px;align-items:center">
+          <span style="width:10px;height:10px;border-radius:50%;background:#93c5fd;animation:dotPulse 1.2s ease-in-out 0s infinite"></span>
+          <span style="width:10px;height:10px;border-radius:50%;background:#93c5fd;animation:dotPulse 1.2s ease-in-out 0.2s infinite"></span>
+          <span style="width:10px;height:10px;border-radius:50%;background:#93c5fd;animation:dotPulse 1.2s ease-in-out 0.4s infinite"></span>
+        </div>
+        <p style="margin:0;font-size:14px;font-weight:700;color:#111827">Generating global insights</p>
+        <div style="width:200px;height:3px;background:#e5e7eb;border-radius:2px;overflow:hidden"><div style="width:40%;height:100%;background:#3b82f6;border-radius:2px;animation:progressSlide 2s ease-in-out infinite"></div></div>
+        <p style="margin:0;font-size:11px;color:#9ca3af">Analysing your dashboard data across all origins and packages...</p>
+      </div>
+
+      <!-- State 3: generated -->
+      <div id="gi-generated" style="display:none">
+      <p class="gi-overall"><strong>Net sales</strong> grew <strong>25% YoY</strong> over Jan – Jul 2026, outperforming the compset's 18% growth. Review score (4.7) remains ahead of compset (4.5), but cancellation and refund rates continue to run above benchmark, and December OTB pacing is falling behind — both merit near-term action.</p>
+      <div>
+        <div class="gi-item">
+          <div class="gi-item-head">
+            <span class="gi-pill gi-pill-p0">P0</span>
+            <strong class="gi-item-title">1D 2Parks+Premier package cancellation rate elevated</strong>
+          </div>
+          <div class="gi-item-body">CXL rate of 11.1% is 2.1pp above compset, with 0% free-cancellation coverage versus the compset's 45%. Refund rate (3.8%) is also the highest across all packages.</div>
+          <p class="gi-item-action"><span style="font-weight:600;color:#374151">Action: </span>Introduce a 24h free-cancellation window on this package and audit voucher delivery to reduce refund-driven cancellations.</p>
+        </div>
+        <div class="gi-item">
+          <div class="gi-item-head">
+            <span class="gi-pill gi-pill-p0">P0</span>
+            <strong class="gi-item-title">December OTB pacing down 24% YoY</strong>
+          </div>
+          <div class="gi-item-body">Confirmed bookings for December participation are running well behind last year's pace at the same point in the booking cycle, risking a shortfall during peak season.</div>
+          <p class="gi-item-action"><span style="font-weight:600;color:#374151">Action: </span>Launch a targeted December promotion within the next 7 days, mirroring the H1 APAC discount that drove strong conversion.</p>
+        </div>
+        <div class="gi-item">
+          <div class="gi-item-head">
+            <span class="gi-pill gi-pill-p1">P1</span>
+            <strong class="gi-item-title">Korea under-converting despite high traffic share</strong>
+          </div>
+          <div class="gi-item-body">South Korea contributes 12% of unit share but booking-window and bad-review signals suggest under-conversion relative to compset.</div>
+          <p class="gi-item-action"><span style="font-weight:600;color:#374151">Action: </span>Review Korea-specific pricing and landing-page experience; consider a localized promotion.</p>
+        </div>
+        <div class="gi-item">
+          <div class="gi-item-head">
+            <span class="gi-pill gi-pill-p2">P2</span>
+            <strong class="gi-item-title">App Exclusive rate plan delivering best ROI</strong>
+          </div>
+          <div class="gi-item-body">The zero-discount App Exclusive rate plan drove 24% of Disneyland Paris package sales, the highest return of any active rate plan.</div>
+          <p class="gi-item-action"><span style="font-weight:600;color:#374151">Action: </span>Extend App Exclusive placement through Q4 to sustain this contribution at no incremental discount cost.</p>
+        </div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KPI Cards (only 3 live today — Avg Booking Value & Activity CVR are computed by the BFF but not rendered) -->
+  <div class="grid grid-cols-3 gap-3 mb-5">
+    <div class="kpi-card" style="border-top-color:#22c55e">
+      <div class="text-xs text-gray-400 uppercase tracking-wide mb-1"><span class="lbl-metric-cap">Net</span> Sales</div>
+      <div class="text-2xl font-bold">58.83M</div>
+      <div class="flex gap-2 mt-2"><span class="badge badge-up">▲104% <span class="lbl-comp-upper">YOY</span></span><span class="bg-gray-100 text-gray-500 rounded px-1.5 py-0.5 text-[10px] font-medium">USD</span></div>
+      <div class="text-xs text-gray-400 mt-1 comp-col">Compset: ▲95.2% <span class="lbl-comp-upper">YOY</span> <span class="badge badge-up" style="font-size:9px">+8.8pp</span></div>
+    </div>
+    <div class="kpi-card" style="border-top-color:#3b82f6">
+      <div class="text-xs text-gray-400 uppercase tracking-wide mb-1"><span class="lbl-metric-cap">Net</span> Units</div>
+      <div class="text-2xl font-bold">807,094</div>
+      <div class="flex gap-2 mt-2"><span class="badge badge-up">▲15.2% <span class="lbl-comp-upper">YOY</span></span></div>
+      <div class="text-xs text-gray-400 mt-1 comp-col">Compset: ▲9.1% <span class="lbl-comp-upper">YOY</span> <span class="badge badge-up" style="font-size:9px">+6.1pp</span></div>
+    </div>
+    <div class="kpi-card" style="border-top-color:#06b6d4">
+      <div class="text-xs text-gray-400 uppercase tracking-wide mb-1">Review Score <span class="info-icon" title="Follows the dashboard date filter">i</span></div>
+      <div class="text-2xl font-bold">4.8</div>
+      <div class="flex gap-2 mt-2"><span class="badge badge-up">▲1.2% <span class="lbl-comp-upper">YOY</span></span></div>
+      <div class="text-xs text-gray-400 mt-1 comp-col">Compset: 4.5 <span class="badge badge-up" style="font-size:9px">▲+4.4%</span></div>
+    </div>
+  </div>
+
+  <div class="sec-hd mb-4">📈 Sales Trend</div>
+  <div class="grid grid-cols-2 gap-4 mb-5">
+    <div class="bg-white p-5 rounded-lg shadow-sm">
+      <div class="flex justify-between items-start mb-3">
+        <div><h4 class="font-semibold text-sm text-gray-800"><span class="lbl-metric-cap">Net</span> Sales (<span class="lbl-comp">YoY</span>)</h4><div class="text-xs text-gray-400 mt-0.5">by <span class="lbl-datebasis">Booking Date</span> · line = <span class="lbl-comp">YoY</span>%</div></div>
+        <div class="tg" id="tg-gran-sales">
+          <button class="tg-btn" onclick="setTG(this,'tg-gran-sales')">D</button>
+          <button class="tg-btn" onclick="setTG(this,'tg-gran-sales')">W</button>
+          <button class="tg-btn active" onclick="setTG(this,'tg-gran-sales')">M</button>
+        </div>
+      </div>
+      <div id="chart-sales" class="chart-container"></div>
+    </div>
+    <div class="bg-white p-5 rounded-lg shadow-sm">
+      <div class="flex justify-between items-start mb-3">
+        <div><h4 class="font-semibold text-sm text-gray-800"><span class="lbl-metric-cap">Net</span> Units (<span class="lbl-comp">YoY</span>)</h4><div class="text-xs text-gray-400 mt-0.5">by <span class="lbl-datebasis">Booking Date</span> · line = <span class="lbl-comp">YoY</span>%</div></div>
+        <div class="tg" id="tg-gran-units">
+          <button class="tg-btn" onclick="setTG(this,'tg-gran-units')">D</button>
+          <button class="tg-btn" onclick="setTG(this,'tg-gran-units')">W</button>
+          <button class="tg-btn active" onclick="setTG(this,'tg-gran-units')">M</button>
+        </div>
+      </div>
+      <div id="chart-units" class="chart-container"></div>
+    </div>
+  </div>
+
+  <div class="sec-hd mb-4">🌍 Origin Analysis</div>
+  <div class="grid grid-cols-2 gap-4 mb-5">
+    <div class="bg-white p-5 rounded-lg shadow-sm">
+      <div class="flex justify-between items-start mb-3">
+        <div><h4 class="font-semibold text-sm text-gray-800"><span class="lbl-metric-cap">Net</span> <span class="lbl-share-metric">Unit</span> Share by Origin</h4><div class="text-xs text-gray-400 mt-0.5">Top 11 + Others<span class="comp-col"> · blue = compset</span></div></div>
+        <div class="tg" id="tg-origin-share">
+          <button class="tg-btn active" onclick="setTG(this,'tg-origin-share');buildOriginShare()">Unit</button>
+          <button class="tg-btn" onclick="setTG(this,'tg-origin-share');buildOriginShare()">Sales</button>
+        </div>
+      </div>
+      <div id="chart-origin-share" class="chart-container-sm"></div>
+      <div class="flex justify-center items-center gap-4 mt-2 text-xs comp-col">
+        <div class="flex items-center gap-1.5"><span class="inline-block w-3 h-3 rounded-sm" style="background-color:#ff5b00"></span><span class="text-gray-600">Merchant</span></div>
+        <div class="flex items-center gap-1.5"><span class="inline-block w-3 h-3 rounded-sm" style="background-color:#2196f3"></span><span class="text-gray-600">Compset</span></div>
+      </div>
+    </div>
+    <div class="bg-white p-5 rounded-lg shadow-sm">
+      <div class="flex justify-between items-start mb-3">
+        <div><h4 class="font-semibold text-sm text-gray-800"><span class="lbl-metric-cap">Net</span> <span class="lbl-comp-metric">Units</span> Composition by Origin</h4><div class="text-xs text-gray-400 mt-0.5">Monthly 100% stacked · Top 11 + Others</div></div>
+        <div class="tg" id="tg-origin-stacked">
+          <button class="tg-btn active" onclick="setTG(this,'tg-origin-stacked');buildOriginStacked()">Unit</button>
+          <button class="tg-btn" onclick="setTG(this,'tg-origin-stacked');buildOriginStacked()">Sales</button>
+        </div>
+      </div>
+      <div id="chart-origin-stacked" class="chart-container-md"></div>
+    </div>
+  </div>
+  <div class="grid grid-cols-1 gap-4 mb-5">
+    <div class="bg-white p-5 rounded-lg shadow-sm">
+      <div class="flex justify-between items-start mb-3">
+        <div><h4 class="font-semibold text-sm text-gray-800">Origin <span class="lbl-comp">YoY</span> Breakdown</h4><div class="text-xs text-gray-400 mt-0.5"><span class="lbl-metric-cap">Net</span> <span class="lbl-bubble-metric">Unit</span> Share vs <span class="lbl-comp">YoY</span> Growth · bubble = volume</div></div>
+        <div class="tg" id="tg-origin-bubble">
+          <button class="tg-btn active" onclick="setTG(this,'tg-origin-bubble');buildOriginBubble()">Unit</button>
+          <button class="tg-btn" onclick="setTG(this,'tg-origin-bubble');buildOriginBubble()">Sales</button>
+        </div>
+      </div>
+      <div id="chart-origin-bubble" class="chart-container-md"></div>
+    </div>
+  </div>
+
+  <div class="sec-hd mb-4 sec-hd-purple">🕐 User Booking Behavior</div>
+
+  <div class="bg-white p-5 rounded-lg shadow-sm mb-5">
+    <div class="mb-3"><h4 class="font-semibold text-sm text-gray-800">Booking Window by Origin</h4><div class="text-xs text-gray-400"><span class="lbl-metric-cap">Net</span> Units · Lead day distribution</div></div>
+    <div class="overflow-x-auto mb-1" style="max-height: 280px;">
+      <table class="rpt-tbl" id="window-tbl">
+        <thead style="position: sticky; top: 0; background: white;"><tr><th>Origin</th><th>% Contribution</th><th>0D</th><th>1-3D</th><th>4-7D</th><th>8-30D</th><th>30D+</th><th>Median</th></tr></thead>
+        <tbody id="window-tbl-body">
+          <tr><td><strong>Overall</strong></td><td><strong>100%</strong></td><td>32%</td><td>35%</td><td>12%</td><td>13%</td><td>8%</td><td><strong>3d</strong></td></tr>
+          <tr class="comp-row" style="background:#fff8f5"><td style="color:#ff5b00"><strong>Compset</strong></td><td style="color:#ff5b00">-</td><td style="color:#ff5b00">28%</td><td style="color:#ff5b00">33%</td><td style="color:#ff5b00">14%</td><td style="color:#ff5b00">16%</td><td style="color:#ff5b00">9%</td><td style="color:#ff5b00"><strong>4d</strong></td></tr>
+          <tr><td>India</td><td>17%</td><td>30%</td><td>32%</td><td>15%</td><td>15%</td><td>8%</td><td>3d</td></tr>
+          <tr><td>South Korea</td><td>12%</td><td>14%</td><td>24%</td><td>29%</td><td>31%</td><td>2%</td><td>6d</td></tr>
+          <tr><td>HK &amp; Macau</td><td>11%</td><td>34%</td><td>27%</td><td>18%</td><td>15%</td><td>6%</td><td>2d</td></tr>
+          <tr><td>Japan</td><td>10%</td><td>25%</td><td>30%</td><td>20%</td><td>15%</td><td>10%</td><td>4d</td></tr>
+          <tr><td>Singapore</td><td>7%</td><td>28%</td><td>28%</td><td>18%</td><td>16%</td><td>10%</td><td>4d</td></tr>
+          <tr><td>Taiwan</td><td>6%</td><td>8%</td><td>24%</td><td>31%</td><td>34%</td><td>3%</td><td>9d</td></tr>
+          <tr><td>Malaysia</td><td>6%</td><td>26%</td><td>28%</td><td>20%</td><td>16%</td><td>10%</td><td>4d</td></tr>
+          <tr><td>Philippines</td><td>6%</td><td>20%</td><td>23%</td><td>20%</td><td>15%</td><td>22%</td><td>4d</td></tr>
+          <tr><td>Mainland CN</td><td>6%</td><td>21%</td><td>21%</td><td>27%</td><td>27%</td><td>4%</td><td>5d</td></tr>
+          <tr><td>Europe</td><td>5%</td><td>15%</td><td>20%</td><td>25%</td><td>25%</td><td>15%</td><td>7d</td></tr>
+          <tr><td>Mid. East</td><td>4%</td><td>25%</td><td>25%</td><td>20%</td><td>20%</td><td>10%</td><td>5d</td></tr>
+          <tr><td>Others</td><td>4%</td><td>12%</td><td>18%</td><td>25%</td><td>30%</td><td>15%</td><td>8d</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-2 gap-4 mb-5">
+    <div class="bg-white p-5 rounded-lg shadow-sm flex flex-col">
+      <div class="mb-3"><h4 class="font-semibold text-sm text-gray-800">Overall Window by <span class="lbl-metric-cap">Net</span> Unit</h4><div class="text-xs text-gray-400 comp-window-sub">Merchant vs Compset · blue = compset</div></div>
+      <div id="chart-overall-window" class="chart-container-sm flex-1"></div>
+    </div>
+    <div class="bg-white p-5 rounded-lg shadow-sm">
+      <div class="mb-3"><h4 class="font-semibold text-sm text-gray-800">Group Composition by <span class="lbl-metric-cap">Net</span> Unit</h4><div class="text-xs text-gray-400">Current <span class="lbl-metric-cap">Net</span> Unit vs <span class="lbl-prev">LY</span> <span class="lbl-metric-cap">Net</span> Unit<span class="comp-col"> · blue = compset</span></div></div>
+      <div id="chart-group-comp" class="chart-container-sm"></div>
+      <div class="text-xs text-gray-400 mt-1">others = unclassified unit type, not adult or child.</div>
+    </div>
+    <div class="bg-white p-5 rounded-lg shadow-sm">
+      <div class="mb-3"><h4 class="font-semibold text-sm text-gray-800">Booking by Day of Week</h4><div class="text-xs text-gray-400"><span class="lbl-metric-cap">Net</span> Units<span class="comp-col"> · Merchant vs Compset</span></div></div>
+      <div id="chart-dow" class="chart-container-sm"></div>
+    </div>
+    <div class="bg-white p-5 rounded-lg shadow-sm">
+      <div class="mb-3"><h4 class="font-semibold text-sm text-gray-800">Booking by Timeslot Distribution</h4><div class="text-xs text-gray-400"><span class="lbl-metric-cap">Net</span> Units<span class="comp-col"> · Merchant vs Compset</span></div></div>
+      <div id="chart-timeslot" class="chart-container-sm"></div>
+    </div>
+  </div>
+
+  <div class="sec-hd mb-4">📦 Merchant, Activity and Package Detail Breakdown</div>
+
+  <div class="bg-white p-5 rounded-lg shadow-sm mb-5">
+    <div class="flex justify-between items-start mb-3">
+      <div><h4 class="font-semibold text-sm text-gray-800">Merchant Sales Contribution</h4><div class="text-xs text-gray-400">% of total MID <span class="lbl-metric-lower">gross</span> sales</div></div>
+      <div class="pkg-dd-wrap">
+        <div class="pkg-dd-btn" onclick="togglePkgDd('msc-pkg-dd')" id="msc-dd-label">All Merchants</div>
+        <div class="pkg-dd-menu" id="msc-pkg-dd">
+          <div class="pkg-dd-item"><input type="checkbox" id="msc-all" checked onchange="filterTreeTable(this,'msc-table','msc-cb','msc-dd-label','All Merchants')"> All Merchants</div>
+          <div class="pkg-dd-item"><input type="checkbox" class="msc-cb" data-pkg="euro-disney" onchange="filterTreeTable(this,'msc-table','msc-cb','msc-dd-label','All Merchants')"> 655 - Euro Disney</div>
+          <div class="pkg-dd-item"><input type="checkbox" class="msc-cb" data-pkg="magic-ways" onchange="filterTreeTable(this,'msc-table','msc-cb','msc-dd-label','All Merchants')"> 32192 - Magic Ways</div>
+          <div class="pkg-dd-item"><input type="checkbox" class="msc-cb" data-pkg="uber-formosa" onchange="filterTreeTable(this,'msc-table','msc-cb','msc-dd-label','All Merchants')"> 14995 - Uber Formosa</div>
+          <div class="pkg-dd-item"><input type="checkbox" class="msc-cb" data-pkg="tiqets" onchange="filterTreeTable(this,'msc-table','msc-cb','msc-dd-label','All Merchants')"> 21808 - Tiqets Int'l</div>
+        </div>
+      </div>
+    </div>
+    <table class="rpt-tbl" id="msc-table">
+      <thead><tr><th>Merchant Group / Merchant</th><th>Sales</th><th>Units</th><th>% to MID Sales</th></tr></thead>
+      <tbody>
+        <tr class="activity-header" data-activity="msc-emea" onclick="toggleActivityRow(this)"><td class="cursor-pointer"><span class="activity-toggle">▼</span> <strong>EMEA Theme Parks</strong></td><td class="font-bold">$3,617K</td><td>35,000</td><td><strong>89.7%</strong></td></tr>
+        <tr class="activity-child" data-activity="msc-emea" data-pkg="euro-disney"><td class="pl-6 text-xs italic text-gray-500">655 - Euro Disney</td><td class="text-gray-700">$3,205K</td><td>31,200</td><td><span class="text-gray-700 text-xs">79.5%</span></td></tr>
+        <tr class="activity-child" data-activity="msc-emea" data-pkg="magic-ways"><td class="pl-6 text-xs italic text-gray-500">32192 - Magic Ways</td><td class="text-gray-700">$412K</td><td>3,800</td><td><span class="text-gray-700 text-xs">10.2%</span></td></tr>
+        <tr class="activity-header" data-activity="msc-apac" onclick="toggleActivityRow(this)"><td class="cursor-pointer"><span class="activity-toggle">▼</span> <strong>APAC OTA Partners</strong></td><td class="font-bold">$413K</td><td>3,934</td><td><strong>10.3%</strong></td></tr>
+        <tr class="activity-child" data-activity="msc-apac" data-pkg="uber-formosa"><td class="pl-6 text-xs italic text-gray-500">14995 - Uber Formosa</td><td class="text-gray-700">$278K</td><td>2,650</td><td><span class="text-gray-700 text-xs">6.9%</span></td></tr>
+        <tr class="activity-child" data-activity="msc-apac" data-pkg="tiqets"><td class="pl-6 text-xs italic text-gray-500">21808 - Tiqets Int'l</td><td class="text-gray-700">$135K</td><td>1,284</td><td><span class="text-gray-700 text-xs">3.4%</span></td></tr>
+        <tr style="background:#f9fafb;font-weight:700"><td>All Merchants Total</td><td class="text-green-700">$4.03M</td><td>38,934</td><td>-</td></tr>
+      </tbody>
+    </table>
+    <div class="flex justify-between items-center mt-3 text-xs text-gray-500">
+      <div id="msc-pagination-info">Showing 1-7 of 7 rows</div>
+      <div class="flex gap-1">
+        <button class="px-2 py-1 border rounded bg-gray-50 text-gray-400 cursor-not-allowed msc-prev-btn" disabled>Prev</button>
+        <button class="px-2 py-1 border rounded bg-klook-orange text-white border-klook-orange msc-page-btn active" data-page="1">1</button>
+        <button class="px-2 py-1 border rounded bg-gray-50 text-gray-400 cursor-not-allowed msc-next-btn" disabled>Next</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-white p-5 rounded-lg shadow-sm mb-5">
+    <div class="flex justify-between items-start mb-3">
+      <div><h4 class="font-semibold text-sm text-gray-800">Package Sales Contribution</h4><div class="text-xs text-gray-400">% of total AID <span class="lbl-metric-lower">gross</span> sales</div></div>
+      <div class="pkg-dd-wrap">
+        <div class="pkg-dd-btn" onclick="togglePkgDd('psc-pkg-dd')" id="psc-dd-label">All Packages</div>
+        <div class="pkg-dd-menu" id="psc-pkg-dd">
+          <div class="pkg-dd-item"><input type="checkbox" id="psc-all" checked onchange="filterTreeTable(this,'psc-table','psc-cb','psc-dd-label','All Packages')"> All Packages</div>
+          <div class="pkg-dd-item"><input type="checkbox" class="psc-cb" data-pkg="386583" onchange="filterTreeTable(this,'psc-table','psc-cb','psc-dd-label','All Packages')"> 1D 2Parks Dated</div>
+          <div class="pkg-dd-item"><input type="checkbox" class="psc-cb" data-pkg="386478" onchange="filterTreeTable(this,'psc-table','psc-cb','psc-dd-label','All Packages')"> 1D 1Park Dated</div>
+          <div class="pkg-dd-item"><input type="checkbox" class="psc-cb" data-pkg="8908" onchange="filterTreeTable(this,'psc-table','psc-cb','psc-dd-label','All Packages')"> Regular 1D 2Parks</div>
+          <div class="pkg-dd-item"><input type="checkbox" class="psc-cb" data-pkg="25476" onchange="filterTreeTable(this,'psc-table','psc-cb','psc-dd-label','All Packages')"> MINI Ticket 1D</div>
+          <div class="pkg-dd-item"><input type="checkbox" class="psc-cb" data-pkg="253741" onchange="filterTreeTable(this,'psc-table','psc-cb','psc-dd-label','All Packages')"> 1D 2Parks+Premier</div>
+        </div>
+      </div>
+    </div>
+    <table class="rpt-tbl" id="psc-table">
+      <thead><tr><th>Activity / Package</th><th>Sales</th><th>Units</th><th>% to AID Sales</th><th>% Combo Package</th></tr></thead>
+      <tbody>
+        <tr class="activity-header" data-activity="disneyland" onclick="toggleActivityRow(this)"><td class="cursor-pointer"><span class="activity-toggle">▼</span> <strong>Disneyland Paris</strong></td><td class="font-bold">$2,803K</td><td>26,600</td><td><strong>100%</strong></td><td>-</td></tr>
+        <tr class="activity-child" data-activity="disneyland" data-pkg="386583"><td class="pl-6 text-xs italic text-gray-500">1D 2Parks Dated</td><td class="text-gray-700">$876K</td><td>8,200</td><td><span class="text-gray-700 text-xs">31%</span></td><td class="text-xs text-gray-500">4%</td></tr>
+        <tr class="activity-child" data-activity="disneyland" data-pkg="386478"><td class="pl-6 text-xs italic text-gray-500">1D 1Park Dated</td><td class="text-gray-700">$723K</td><td>7,100</td><td><span class="text-gray-700 text-xs">26%</span></td><td class="text-xs text-gray-500">3%</td></tr>
+        <tr class="activity-child" data-activity="disneyland" data-pkg="8908"><td class="pl-6 text-xs italic text-gray-500">Regular 1D 2Parks</td><td class="text-gray-700">$564K</td><td>5,400</td><td><span class="text-gray-700 text-xs">20%</span></td><td class="text-xs text-gray-500">6%</td></tr>
+        <tr class="activity-child" data-activity="disneyland" data-pkg="25476"><td class="pl-6 text-xs italic text-gray-500">MINI Ticket 1D</td><td class="text-gray-700">$443K</td><td>4,300</td><td><span class="text-gray-700 text-xs">16%</span></td><td class="text-xs text-gray-500">2%</td></tr>
+        <tr class="activity-child" data-activity="disneyland" data-pkg="253741"><td class="pl-6 text-xs italic text-gray-500">1D 2Parks+Premier</td><td class="text-gray-700">$201K</td><td>2,100</td><td><span class="text-gray-700 text-xs">7%</span></td><td class="text-xs text-gray-500">9%</td></tr>
+        <tr class="activity-header" data-activity="disneyland-plus" onclick="toggleActivityRow(this)"><td class="cursor-pointer"><span class="activity-toggle">▼</span> <strong>Disneyland Paris + Add-ons</strong></td><td class="font-bold">$969K</td><td>9,500</td><td><strong>100%</strong></td><td>-</td></tr>
+        <tr class="activity-child" data-activity="disneyland-plus" data-pkg="386583"><td class="pl-6 text-xs italic text-gray-500">1D 2Parks Dated + Transfer</td><td class="text-gray-700">$326K</td><td>3,200</td><td><span class="text-gray-700 text-xs">34%</span></td><td class="text-xs text-gray-500">71%</td></tr>
+        <tr class="activity-child" data-activity="disneyland-plus" data-pkg="386478"><td class="pl-6 text-xs italic text-gray-500">1D 1Park Dated + Meal</td><td class="text-gray-700">$255K</td><td>2,500</td><td><span class="text-gray-700 text-xs">26%</span></td><td class="text-xs text-gray-500">83%</td></tr>
+        <tr class="activity-child" data-activity="disneyland-plus" data-pkg="8908"><td class="pl-6 text-xs italic text-gray-500">Regular 1D 2Parks + Fast Track</td><td class="text-gray-700">$187K</td><td>1,800</td><td><span class="text-gray-700 text-xs">19%</span></td><td class="text-xs text-gray-500">88%</td></tr>
+        <tr class="activity-child" data-activity="disneyland-plus" data-pkg="25476"><td class="pl-6 text-xs italic text-gray-500">MINI Ticket 1D + Souvenir</td><td class="text-gray-700">$124K</td><td>1,200</td><td><span class="text-gray-700 text-xs">13%</span></td><td class="text-xs text-gray-500">65%</td></tr>
+        <tr class="activity-child" data-activity="disneyland-plus" data-pkg="253741"><td class="pl-6 text-xs italic text-gray-500">1D 2Parks+Premier+VIP</td><td class="text-gray-700">$77K</td><td>800</td><td><span class="text-gray-700 text-xs">8%</span></td><td class="text-xs text-gray-500">92%</td></tr>
+        <tr style="background:#f9fafb;font-weight:700"><td>All Packages Total</td><td class="text-green-700">$4.03M</td><td>38,934</td><td>-</td><td>-</td></tr>
+      </tbody>
+    </table>
+    <div class="flex justify-between items-center mt-3 text-xs text-gray-500">
+      <div id="psc-pagination-info">Showing 1-11 of 11 rows</div>
+      <div class="flex gap-1">
+        <button class="px-2 py-1 border rounded bg-gray-50 text-gray-400 cursor-not-allowed psc-prev-btn" disabled>Prev</button>
+        <button class="px-2 py-1 border rounded bg-klook-orange text-white border-klook-orange psc-page-btn active" data-page="1">1</button>
+        <button class="px-2 py-1 border rounded bg-gray-50 text-gray-500 psc-next-btn">Next</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-2 gap-4 mb-5">
+    <div class="bg-white p-5 rounded-lg shadow-sm">
+      <div class="flex justify-between items-start mb-3 flex-wrap gap-2">
+        <div><h4 class="font-semibold text-sm text-gray-800">Package <span class="lbl-metric-cap">Net</span> Sales Comparison</h4><div class="text-xs text-gray-400 mt-0.5">by <span class="lbl-datebasis">Booking Date</span></div></div>
+        <div class="flex items-center gap-2 flex-wrap">
+          <div class="stepper" id="pkgsales-stepper" onclick="toggleStepperReveal('pkgsales',event)"><span class="text-[10px] text-gray-400 font-semibold">TOP</span><button class="stepper-btn" style="display:none" onclick="event.stopPropagation();stepTopN('pkgsales',-1)">−</button><input type="text" id="pkgsales-topn" value="5" readonly><button class="stepper-btn" style="display:none" onclick="event.stopPropagation();stepTopN('pkgsales',1)">+</button></div>
+          <div class="pkg-dd-wrap">
+            <div class="pkg-dd-btn" id="pkgsales-dd-label">5 selected</div>
+          </div>
+          <select class="gran-select" onchange="buildPkgComparison('pkgsales',this.value)">
+            <option>Daily</option><option>Weekly</option><option selected>Monthly</option>
+          </select>
+        </div>
+      </div>
+      <div id="chart-pkg-sales-comp" class="chart-container-sm"></div>
+    </div>
+    <div class="bg-white p-5 rounded-lg shadow-sm">
+      <div class="flex justify-between items-start mb-3 flex-wrap gap-2">
+        <div><h4 class="font-semibold text-sm text-gray-800">Package <span class="lbl-metric-cap">Net</span> Units Comparison</h4><div class="text-xs text-gray-400 mt-0.5">by <span class="lbl-datebasis">Booking Date</span></div></div>
+        <div class="flex items-center gap-2 flex-wrap">
+          <div class="stepper" id="pkgunits-stepper" onclick="toggleStepperReveal('pkgunits',event)"><span class="text-[10px] text-gray-400 font-semibold">TOP</span><button class="stepper-btn" style="display:none" onclick="event.stopPropagation();stepTopN('pkgunits',-1)">−</button><input type="text" id="pkgunits-topn" value="5" readonly><button class="stepper-btn" style="display:none" onclick="event.stopPropagation();stepTopN('pkgunits',1)">+</button></div>
+          <div class="pkg-dd-wrap">
+            <div class="pkg-dd-btn" id="pkgunits-dd-label">5 selected</div>
+          </div>
+          <select class="gran-select" onchange="buildPkgComparison('pkgunits',this.value)">
+            <option>Daily</option><option>Weekly</option><option selected>Monthly</option>
+          </select>
+        </div>
+      </div>
+      <div id="chart-pkg-units-comp" class="chart-container-sm"></div>
+    </div>
+  </div>
+
+  <div class="sec-hd mb-4 sec-hd-purple">⭐ Review Insights — Last 90 Days</div>
+  <div class="bg-white p-5 rounded-lg shadow-sm mb-5">
+    <div class="mb-3"><h4 class="font-semibold text-sm text-gray-800">Review Score Overview</h4><div class="text-xs text-gray-400">Monitor rating trends and distribution shifts against your 90-day benchmark</div></div>
+    <div class="grid" style="grid-template-columns: 1.55fr 1fr; gap:16px;">
+      <div>
+        <div class="period-block baseline">
+          <div class="period-block-title">Last 90 Days <span class="info-icon" title="Baseline window">i</span></div>
+          <div class="period-block-sub">Baseline window</div>
+          <div class="kpi-mini-row">
+            <div class="kpi-mini"><div class="kpi-mini-label">Overall Score</div><div class="kpi-mini-val">4.7</div></div>
+            <div class="kpi-mini comp-col"><div class="kpi-mini-label">Compset</div><div class="kpi-mini-val">4.4</div></div>
+            <div class="kpi-mini comp-col"><div class="kpi-mini-label">vs Comp</div><div class="kpi-mini-val" style="color:#22c55e">+0.3</div></div>
+            <div class="kpi-mini"><div class="kpi-mini-label">Total Reviews</div><div class="kpi-mini-val">989</div></div>
+            <div class="kpi-mini"><div class="kpi-mini-label">Bad Review %</div><div class="kpi-mini-val" style="color:#ef4444">6.2%</div></div>
+          </div>
+        </div>
+        <div class="period-block">
+          <div class="period-block-title">Selected Period</div>
+          <div class="period-block-sub">Matches dashboard date filter</div>
+          <div class="kpi-mini-row">
+            <div class="kpi-mini"><div class="kpi-mini-label">Overall Score</div><div class="kpi-mini-val">4.8</div></div>
+            <div class="kpi-mini comp-col"><div class="kpi-mini-label">Compset</div><div class="kpi-mini-val">4.5</div></div>
+            <div class="kpi-mini comp-col"><div class="kpi-mini-label">vs Comp</div><div class="kpi-mini-val" style="color:#22c55e">+0.3</div></div>
+            <div class="kpi-mini"><div class="kpi-mini-label">Total Reviews</div><div class="kpi-mini-val">3,542</div></div>
+            <div class="kpi-mini"><div class="kpi-mini-label">Bad Review %</div><div class="kpi-mini-val" style="color:#ef4444">5.5%</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="bg-gray-50 rounded-lg p-3">
+        <div class="text-[10px] font-bold text-gray-500 uppercase tracking-wide mb-3">Review Score Overview (Last 90 Days)</div>
+        <div class="star-row"><span class="star-label">5★</span><div class="star-bar-bg"><div class="star-bar-fill" style="width:93%;background:#22c55e"></div></div><span class="star-pct">93%</span></div>
+        <div class="star-row"><span class="star-label">4★</span><div class="star-bar-bg"><div class="star-bar-fill" style="width:4%;background:#84cc16"></div></div><span class="star-pct">4%</span></div>
+        <div class="star-row"><span class="star-label">3★</span><div class="star-bar-bg"><div class="star-bar-fill" style="width:2%;background:#eab308"></div></div><span class="star-pct">2%</span></div>
+        <div class="star-row"><span class="star-label">2★</span><div class="star-bar-bg"><div class="star-bar-fill" style="width:0.5%;background:#f97316"></div></div><span class="star-pct">0.5%</span></div>
+        <div class="star-row"><span class="star-label">1★</span><div class="star-bar-bg"><div class="star-bar-fill" style="width:0.5%;background:#ef4444"></div></div><span class="star-pct">0.5%</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI Review Insights — newer companion card to Global AI Insights, scoped to the review-insights section
+       (seen live on stage; not yet in this local checkout's branch — reproduced from the stage screenshot) -->
+  <div class="gi-card">
+    <div class="gi-header">
+      <div class="text-sm font-bold text-gray-700 flex items-center gap-2">✨ AI Review Insights <span class="info-icon" title="Generated from guest review text over the baseline window">i</span>
+        <span class="bg-gray-100 text-gray-500 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide">Last 90 Days (Baseline)</span>
+      </div>
+      <button class="gi-regen-btn" id="ari-regen-btn" style="display:none;background:none;border:none;color:#FF6512;font-weight:600" onclick="generateReviewInsights(true)">↻ Regenerate</button>
+    </div>
+    <div class="gi-body">
+      <div id="ari-empty" style="display:flex;flex-direction:column;align-items:center;padding:32px 16px;gap:12px;background:#f9fafb;border-radius:8px">
+        <div style="width:52px;height:52px;border-radius:50%;background:#FFF7EF;border:1px solid #FDE7D6;display:flex;align-items:center;justify-content:center;font-size:22px;color:#FF6512">☆</div>
+        <p style="margin:0;font-size:13px;color:#374151;font-weight:500">Review insights not generated yet</p>
+        <button onclick="generateReviewInsights(false)" style="background:#FF6512;color:white;border:none;border-radius:20px;padding:9px 24px;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:0.2px">Generate Review Insights</button>
+      </div>
+      <div id="ari-loading" style="display:none;flex-direction:column;align-items:center;padding:32px 16px;gap:12px;background:#f9fafb;border-radius:8px">
+        <div style="display:flex;gap:6px;align-items:center">
+          <span style="width:10px;height:10px;border-radius:50%;background:#93c5fd;animation:dotPulse 1.2s ease-in-out 0s infinite"></span>
+          <span style="width:10px;height:10px;border-radius:50%;background:#93c5fd;animation:dotPulse 1.2s ease-in-out 0.2s infinite"></span>
+          <span style="width:10px;height:10px;border-radius:50%;background:#93c5fd;animation:dotPulse 1.2s ease-in-out 0.4s infinite"></span>
+        </div>
+        <p style="margin:0;font-size:14px;font-weight:700;color:#111827">Generating review insights</p>
+        <div style="width:200px;height:3px;background:#e5e7eb;border-radius:2px;overflow:hidden"><div style="width:40%;height:100%;background:#3b82f6;border-radius:2px;animation:progressSlide 2s ease-in-out infinite"></div></div>
+        <p style="margin:0;font-size:11px;color:#9ca3af">Reading review text from the last 90 days...</p>
+      </div>
+      <div id="ari-generated" style="display:none">
+        <div class="ari-cols">
+          <div>
+            <div class="ari-col-hd love"><span>♡ What guests love</span><span class="ari-theme-pill love">3 themes</span></div>
+
+            <div class="ari-theme">
+              <div class="ari-theme-title">Smooth QR Code Entry</div>
+              <span class="ari-stat-pill love">~29% of positive reviews <span class="info-icon" title="Share of positive reviews mentioning this theme">i</span></span>
+              <div class="ari-quote">"Seamless entry using the QR code provided in the ticket. The ticket came with snack redemption, value at about 65 to 75 HKD, which was equally easy to use."</div>
+              <div class="ari-quote">"Entry on the day was convenient, and the wait for each ride was only 5 to 25 minutes."</div>
+              <div class="ari-action-label">+ Amplify</div>
+              <div class="ari-action-box love">Guests consistently describe QR code entry as seamless and hassle-free — reinforce this in your voucher redemption instructions with a clear step-by-step guide (e.g. screenshot the QR, scan at the turnstile) to set accurate expectations.</div>
+              <div class="ari-action-box love">Reviews highlight that no separate park reservation is needed after purchase — make this explicit in your Key Highlights so guests feel confident before they arrive.</div>
+            </div>
+
+            <div class="ari-theme">
+              <div class="ari-theme-title">Food & Meal Voucher Value</div>
+              <span class="ari-stat-pill love">~22% of positive reviews <span class="info-icon" title="Share of positive reviews mentioning this theme">i</span></span>
+              <div class="ari-quote">"It was delicious, and the steak portion was very generous."</div>
+              <div class="ari-quote">"I exchanged for popcorn and two meals (lunch and dinner), which was pretty good; I never went hungry."</div>
+              <div class="ari-action-label">+ Amplify</div>
+              <div class="ari-action-box love">Multiple reviews mention the snack voucher (popcorn, ice cream) as a pleasant bonus — ensure the full list of eligible snack items and redemption locations is clearly listed in your Included / Excluded section to reduce confusion at the kiosks.</div>
+            </div>
+
+            <div class="ari-theme">
+              <div class="ari-theme-title">Magical Park Experience</div>
+              <span class="ari-stat-pill love">~21% of positive reviews <span class="info-icon" title="Share of positive reviews mentioning this theme">i</span></span>
+              <div class="ari-quote">"A very beautiful little Disney park with great attractions! The decorations were amazing! We had an excellent day and ate well! And the final show with the fireworks was very beautiful!"</div>
+              <div class="ari-quote">"Visiting Disneyland was a lifetime experience, especially for the kids, various rides options, Disney characters parade, fireworks at night, all things were just mesmerizing."</div>
+              <div class="ari-action-label">+ Amplify</div>
+              <div class="ari-action-box love">Multiple reviews mention rides like Frozen, Grizzly Mountain, and Hyperspace Mountain as must-dos — call these out by name in your Key Highlights to help guests plan their day.</div>
+            </div>
+          </div>
+
+          <div>
+            <div class="ari-col-hd improve"><span>✱ What guests want improved</span><span class="ari-theme-pill improve">3 themes</span></div>
+
+            <div class="ari-theme">
+              <div class="ari-theme-title">Value didn't match the price paid</div>
+              <span class="ari-stat-pill improve">29% of negative reviews · avg 2.1</span>
+              <div class="ari-quote">"If your meal doesn't reach HKD 160, you can't use it as a discount for drinks. In terms of value for money, it's not very cost-effective."</div>
+              <div class="ari-action-label">⊙ Fix</div>
+              <div class="ari-action-box improve">Guests describe confusion around minimum spend thresholds (e.g. the HKD 160 meal requirement for drink discounts) — clarify these conditions explicitly in your Package Included / Excluded section so guests know exactly what is and isn't covered before they visit.</div>
+              <div class="ari-action-box improve">Reviews mention that add-on descriptions (such as the Corner Cafe tea set) were unclear about portion sizes and serving counts — review and update your package description to specify serving sizes and any key conditions for each upgrade.</div>
+            </div>
+
+            <div class="ari-theme">
+              <div class="ari-theme-title">Customer support delays</div>
+              <span class="ari-stat-pill improve">12% of negative reviews · avg 1.0</span>
+              <div class="ari-quote">"Wasn't able to use it because klook never confirmed the booking but still charged my account. Still asking for a refund but I nobody replied to me."</div>
+              <div class="ari-quote">"Not good. We booked incorrect date ans they don't whant to change date or cancelled and refund."</div>
+              <div class="ari-action-label">⊙ Fix</div>
+              <div class="ari-action-box improve">Guests describe situations where they booked the wrong date and were unable to change or cancel — review your cancellation policy wording and ensure date-change options (if any) are clearly stated so guests understand their options before contacting support.</div>
+              <div class="ari-action-box improve">Multiple reviews mention not receiving replies after raising booking or refund issues — consider setting up message templates for common scenarios (booking confirmation delays, date changes) to ensure faster, consistent responses.</div>
+            </div>
+
+            <div class="ari-theme">
+              <div class="ari-theme-title">Paid extras that weren't needed</div>
+              <span class="ari-stat-pill improve">12% of negative reviews · avg 2.3</span>
+              <div class="ari-quote">"160hkd inclusion is insufficient pls include packages with no cash out anymore. we still needed to add money which depleted the purpose"</div>
+              <div class="ari-action-label">⊙ Fix</div>
+              <div class="ari-action-box improve">Guests describe the HKD 160 meal inclusion as insufficient for a full meal without additional cash outlay — clarify in your Package Included / Excluded section exactly what the voucher covers and note that top-up payments may be required for certain menu items.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec-hd mb-4">🔧 Supply Health</div>
+  <div class="bg-white p-5 rounded-lg shadow-sm mb-5">
+    <div class="flex justify-between items-start mb-4">
+      <div><h4 class="font-semibold text-sm text-gray-800">Supply Health by Package</h4><div class="text-xs text-gray-400">vs compset benchmarks</div></div>
+      <div class="pkg-dd-wrap">
+        <div class="pkg-dd-btn" onclick="togglePkgDd('supply-pkg-dd')" id="supply-dd-label">All Packages</div>
+        <div class="pkg-dd-menu" id="supply-pkg-dd">
+          <div class="pkg-dd-item"><input type="checkbox" id="supply-all" checked onchange="filterTreeTable(this,'supply-table','supply-cb','supply-dd-label','All Packages')"> All Packages</div>
+          <div class="pkg-dd-item"><input type="checkbox" class="supply-cb" data-pkg="386583" onchange="filterTreeTable(this,'supply-table','supply-cb','supply-dd-label','All Packages')"> 1D 2Parks Dated</div>
+          <div class="pkg-dd-item"><input type="checkbox" class="supply-cb" data-pkg="386478" onchange="filterTreeTable(this,'supply-table','supply-cb','supply-dd-label','All Packages')"> 1D 1Park Dated</div>
+          <div class="pkg-dd-item"><input type="checkbox" class="supply-cb" data-pkg="8908" onchange="filterTreeTable(this,'supply-table','supply-cb','supply-dd-label','All Packages')"> Regular 1D 2Parks</div>
+          <div class="pkg-dd-item"><input type="checkbox" class="supply-cb" data-pkg="25476" onchange="filterTreeTable(this,'supply-table','supply-cb','supply-dd-label','All Packages')"> MINI Ticket 1D</div>
+          <div class="pkg-dd-item"><input type="checkbox" class="supply-cb" data-pkg="253741" onchange="filterTreeTable(this,'supply-table','supply-cb','supply-dd-label','All Packages')"> 1D 2Parks+Premier</div>
+        </div>
+      </div>
+    </div>
+    <div class="flex gap-3 mb-4 flex-wrap">
+      <div class="bg-gray-50 rounded-lg p-3 flex-1 min-w-24 text-center">
+        <div class="text-xs text-gray-400 mb-1">Avg CXL Rate</div>
+        <div class="text-xl font-bold text-orange-500">8.5%</div>
+        <div class="text-xs text-gray-400 comp-col mt-1">Comp: 6.3% <span class="badge badge-dn" style="font-size:9px">+2.2pp</span></div>
+      </div>
+      <div class="bg-gray-50 rounded-lg p-3 flex-1 min-w-24 text-center">
+        <div class="text-xs text-gray-400 mb-1">Avg. Refund Rate</div>
+        <div class="text-xl font-bold text-orange-500">2.1%</div>
+        <div class="text-xs text-gray-400 comp-col mt-1">Comp: 1.4% <span class="badge badge-dn" style="font-size:9px">+0.7pp</span></div>
+      </div>
+      <div class="bg-gray-50 rounded-lg p-3 flex-1 min-w-24 text-center">
+        <div class="text-xs text-gray-400 mb-1">Avg Bad Review %</div>
+        <div class="text-xl font-bold text-red-500">2.2%</div>
+        <div class="text-xs text-gray-400 comp-col mt-1">Comp: 1.8% <span class="badge badge-dn" style="font-size:9px">+0.4pp</span></div>
+      </div>
+    </div>
+    <div class="overflow-x-auto">
+    <table class="rpt-tbl" id="supply-table">
+      <thead><tr><th>Activity / Package</th><th>CXL Policy</th><th>CXL Rate</th><th class="comp-col">vs Comp</th><th>Refund Rate</th><th class="comp-col">vs Comp</th><th>Bad Review</th><th>Status</th><th>Same Day</th><th>Next Day</th></tr></thead>
+      <tbody>
+        <tr class="activity-header" data-activity="supply-disneyland" onclick="toggleActivityRow(this)"><td class="cursor-pointer"><span class="activity-toggle">▼</span> <strong>Disneyland Paris</strong></td><td class="text-gray-400">-</td><td class="font-bold">8.7%</td><td class="comp-col text-red-600 text-xs font-bold">+0.4pp</td><td class="font-bold">2.3%</td><td class="comp-col text-red-600 text-xs font-bold">+0.9pp</td><td class="font-bold">1.8%</td><td><span class="tp tp-bd">Action!</span></td><td class="text-gray-400">-</td><td class="text-gray-400">-</td></tr>
+        <tr class="activity-child" data-activity="supply-disneyland" data-pkg="386583"><td class="pl-6 text-xs">1D 2Parks Dated</td><td class="text-xs">No cancel</td><td>8.0%</td><td class="comp-col text-green-600 text-xs">-0.5pp</td><td>1.8%</td><td class="comp-col text-green-600 text-xs">-0.4pp</td><td>1.8%</td><td><span class="tp tp-ok">✓ OK</span></td><td class="bool-true">true</td><td class="bool-true">true</td></tr>
+        <tr class="activity-child" data-activity="supply-disneyland" data-pkg="386478"><td class="pl-6 text-xs">1D 1Park Dated</td><td class="text-xs">No cancel</td><td>7.5%</td><td class="comp-col text-green-600 text-xs">-1.0pp</td><td>2.0%</td><td class="comp-col text-gray-400 text-xs">0pp</td><td>1.2%</td><td><span class="tp tp-ok">✓ OK</span></td><td class="bool-true">true</td><td class="bool-true">true</td></tr>
+        <tr class="activity-child" data-activity="supply-disneyland" data-pkg="8908"><td class="pl-6 text-xs">Regular 1D 2Parks</td><td class="text-xs">Flexible 12h</td><td>10.0%</td><td class="comp-col text-red-600 text-xs">+0.4pp</td><td>2.3%</td><td class="comp-col text-red-600 text-xs">+0.9pp</td><td>2.1%</td><td><span class="tp tp-bd">Action!</span></td><td class="bool-false">false</td><td class="bool-true">true</td></tr>
+        <tr class="activity-child" data-activity="supply-disneyland" data-pkg="25476"><td class="pl-6 text-xs">MINI Ticket 1D</td><td class="text-xs">No cancel</td><td>6.8%</td><td class="comp-col text-green-600 text-xs">-1.5pp</td><td>1.5%</td><td class="comp-col text-green-600 text-xs">-0.6pp</td><td>0.9%</td><td><span class="tp tp-ok">✓ OK</span></td><td class="bool-true">true</td><td class="bool-true">true</td></tr>
+        <tr class="activity-child" data-activity="supply-disneyland" data-pkg="253741"><td class="pl-6 text-xs">1D 2Parks+Premier</td><td class="text-xs">No cancel</td><td>11.1%</td><td class="comp-col text-red-600 font-semibold text-xs">+2.1pp</td><td>3.8%</td><td class="comp-col text-red-600 font-semibold text-xs">+2.4pp</td><td>3.8%</td><td><span class="tp tp-bd">Action!</span></td><td class="bool-false">false</td><td class="bool-false">false</td></tr>
+        <tr class="activity-child" data-activity="supply-disneyland" data-pkg="386583"><td class="pl-6 text-xs">1D 2Parks Dated + Transfer</td><td class="text-xs">Free 24h</td><td>9.2%</td><td class="comp-col text-red-600 text-xs">+0.8pp</td><td>2.5%</td><td class="comp-col text-gray-400 text-xs">0pp</td><td>2.0%</td><td><span class="tp tp-bd">Action!</span></td><td class="bool-false">false</td><td class="bool-true">true</td></tr>
+        <tr class="activity-child" data-activity="supply-disneyland" data-pkg="386478"><td class="pl-6 text-xs">1D 1Park Dated + Meal</td><td class="text-xs">No cancel</td><td>7.8%</td><td class="comp-col text-green-600 text-xs">-0.7pp</td><td>1.9%</td><td class="comp-col text-green-600 text-xs">-0.3pp</td><td>1.5%</td><td><span class="tp tp-ok">✓ OK</span></td><td class="bool-true">true</td><td class="bool-true">true</td></tr>
+        <tr class="activity-child" data-activity="supply-disneyland" data-pkg="8908"><td class="pl-6 text-xs">Regular 1D 2Parks + Fast Track</td><td class="text-xs">Flexible 48h</td><td>11.5%</td><td class="comp-col text-red-600 text-xs">+1.9pp</td><td>2.8%</td><td class="comp-col text-red-600 text-xs">+1.4pp</td><td>2.4%</td><td><span class="tp tp-bd">Action!</span></td><td class="bool-false">false</td><td class="bool-false">false</td></tr>
+        <tr class="activity-child" data-activity="supply-disneyland" data-pkg="25476"><td class="pl-6 text-xs">MINI Ticket 1D + Souvenir</td><td class="text-xs">No cancel</td><td>6.5%</td><td class="comp-col text-green-600 text-xs">-1.8pp</td><td>1.4%</td><td class="comp-col text-gray-400 text-xs">0pp</td><td>0.8%</td><td><span class="tp tp-ok">✓ OK</span></td><td class="bool-true">true</td><td class="bool-true">true</td></tr>
+        <tr class="activity-child" data-activity="supply-disneyland" data-pkg="253741"><td class="pl-6 text-xs">1D 2Parks+Premier+VIP</td><td class="text-xs">No cancel</td><td>12.3%</td><td class="comp-col text-red-600 font-semibold text-xs">+3.3pp</td><td>4.2%</td><td class="comp-col text-red-600 font-semibold text-xs">+2.8pp</td><td>4.1%</td><td><span class="tp tp-bd">Action!</span></td><td class="bool-false">false</td><td class="bool-false">false</td></tr>
+        <tr class="activity-child" data-activity="supply-disneyland" data-pkg="567123"><td class="pl-6 text-xs">Annual Pass Holder 20% — 1D 2Parks</td><td class="text-xs">No cancel</td><td>5.2%</td><td class="comp-col text-green-600 text-xs">-3.1pp</td><td>1.1%</td><td class="comp-col text-green-600 text-xs">-0.5pp</td><td>0.6%</td><td><span class="tp tp-ok">✓ OK</span></td><td class="bool-true">true</td><td class="bool-true">true</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="flex justify-between items-center mt-3 text-xs text-gray-500">
+      <div id="supply-pagination-info">Showing 1-10 of 11 rows</div>
+      <div class="flex gap-1">
+        <button class="px-2 py-1 border rounded bg-gray-50 text-gray-400 cursor-not-allowed supply-prev-btn" disabled>Prev</button>
+        <button class="px-2 py-1 border rounded bg-klook-orange text-white border-klook-orange supply-page-btn active" data-page="1">1</button>
+        <button class="px-2 py-1 border rounded bg-gray-50 text-gray-500 supply-next-btn">Next</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-white p-5 rounded-lg shadow-sm mb-5">
+    <div class="flex justify-between items-start mb-4">
+      <div><h4 class="font-semibold text-sm text-gray-800">Supply Inventory by Package</h4><div class="text-xs text-gray-400">inventory window vs customer book lead</div></div>
+    </div>
+    <div class="flex gap-3 mb-4 flex-wrap">
+      <div class="stat-card-lg" style="background:#eef2ff">
+        <div class="stat-card-val-lg" style="color:#4338ca">2</div>
+        <div class="stat-card-label-lg">Packages Need Extending</div>
+      </div>
+      <div class="stat-card-lg" style="background:#ecfdf5">
+        <div class="stat-card-val-lg" style="color:#047857">$186K</div>
+        <div class="stat-card-label-lg">Est. Revenue Unlocked</div>
+      </div>
+    </div>
+    <div class="overflow-x-auto">
+    <table class="rpt-tbl inv-tbl" id="inventory-table">
+      <thead><tr><th>Activity / Package</th><th>Earliest Bookable Date</th><th>Latest Bookable Date</th><th>Days Open</th><th>Book Window Recommendation <span class="info-icon" title="Klook's recommended book window based on customer booking trends">i</span></th><th>Gap</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr class="activity-header" data-activity="inv-disneyland" onclick="toggleActivityRow(this)"><td class="cursor-pointer"><span class="activity-toggle">▼</span> <strong>Disneyland Paris</strong></td><td class="text-gray-400">-</td><td class="text-gray-400">-</td><td class="text-gray-400">-</td><td class="font-bold">333d</td><td class="text-gray-400">-</td><td class="text-gray-400">-</td></tr>
+        <tr class="activity-child" data-activity="inv-disneyland"><td class="pl-6 text-xs italic text-gray-500">1D 2Parks Dated</td><td class="text-xs">2026-08-01</td><td class="text-xs">2027-06-30</td><td>333d</td><td class="text-gray-400">-</td><td>Sufficient</td><td><span class="status-plain ok">✓ OK</span></td></tr>
+        <tr class="activity-child" data-activity="inv-disneyland"><td class="pl-6 text-xs italic text-gray-500">1D 1Park Dated</td><td class="text-xs">2026-08-01</td><td class="text-xs">2027-03-31</td><td>242d</td><td class="text-gray-400">-</td><td>Sufficient</td><td><span class="status-plain ok">✓ OK</span></td></tr>
+        <tr class="activity-child" data-activity="inv-disneyland"><td class="pl-6 text-xs italic text-gray-500">Regular 1D 2Parks</td><td class="text-xs">2026-08-01</td><td class="text-xs">2026-11-30</td><td>121d</td><td class="text-gray-400">-</td><td>3d short</td><td><span class="status-plain extend">Extend</span></td></tr>
+        <tr class="activity-child" data-activity="inv-disneyland"><td class="pl-6 text-xs italic text-gray-500">MINI Ticket 1D</td><td class="text-xs">2026-08-01</td><td class="text-xs">2026-10-15</td><td>75d</td><td class="text-gray-400">-</td><td>10d short</td><td><span class="status-plain extend">Extend</span></td></tr>
+        <tr class="activity-child" data-activity="inv-disneyland"><td class="pl-6 text-xs italic text-gray-500">1D 2Parks+Premier</td><td class="text-xs">2026-08-01</td><td class="text-xs">2027-06-30</td><td>333d</td><td class="text-gray-400">-</td><td>Sufficient</td><td><span class="status-plain ok">✓ OK</span></td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="flex justify-between items-center mt-3 text-xs text-gray-500">
+      <div id="inventory-pagination-info">Showing 1-6 of 6 rows</div>
+      <div class="flex gap-1">
+        <button class="px-2 py-1 border rounded bg-gray-50 text-gray-400 cursor-not-allowed inventory-prev-btn" disabled>Prev</button>
+        <button class="px-2 py-1 border rounded bg-klook-orange text-white border-klook-orange inventory-page-btn active" data-page="1">1</button>
+        <button class="px-2 py-1 border rounded bg-gray-50 text-gray-400 cursor-not-allowed inventory-next-btn" disabled>Next</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec-hd mb-4 sec-hd-purple">🎯 Promotion &amp; Rate Plan</div>
+  <div class="bg-white p-5 rounded-lg shadow-sm mb-5">
+    <div class="flex justify-between items-start mb-3">
+      <div><h4 class="font-semibold text-sm text-gray-800">Rate Plan Performance</h4><div class="text-xs text-gray-400">by package name · sorted by <span class="lbl-metric-lower">gross</span> sales</div></div>
+      <div class="pkg-dd-wrap">
+        <div class="pkg-dd-btn" onclick="togglePkgDd('rate-pkg-dd')" id="rate-dd-label">All Packages</div>
+        <div class="pkg-dd-menu" id="rate-pkg-dd">
+          <div class="pkg-dd-item"><input type="checkbox" id="rate-all" checked onchange="filterTreeTable(this,'rate-table','rate-cb','rate-dd-label','All Packages')"> All Packages</div>
+          <div class="pkg-dd-item"><input type="checkbox" class="rate-cb" data-pkg="386583" onchange="filterTreeTable(this,'rate-table','rate-cb','rate-dd-label','All Packages')"> 1D 2Parks Dated</div>
+          <div class="pkg-dd-item"><input type="checkbox" class="rate-cb" data-pkg="386478" onchange="filterTreeTable(this,'rate-table','rate-cb','rate-dd-label','All Packages')"> 1D 1Park Dated</div>
+        </div>
+      </div>
+    </div>
+    <div class="overflow-x-auto">
+    <table class="rpt-tbl" id="rate-table">
+      <thead><tr><th>Activity / Package Name</th><th>Period</th><th>Discount</th><th>Sales</th><th>% to AID Sales</th><th>Units</th></tr></thead>
+      <tbody>
+        <tr class="activity-header" data-activity="rate-disneyland" onclick="toggleActivityRow(this)"><td class="cursor-pointer"><span class="activity-toggle">▼</span> <strong>Disneyland Paris</strong></td><td class="text-gray-400">-</td><td class="text-gray-400">-</td><td class="font-bold">$765K</td><td><strong>100%</strong></td><td>11,436</td></tr>
+        <tr class="activity-child" data-activity="rate-disneyland" data-pkg="386583"><td class="pl-6 text-xs italic text-gray-500">App Exclusive — 1D 2Parks</td><td class="text-xs">Jan–Mar</td><td><span class="text-green-600 text-xs font-medium">No cost</span></td><td class="text-gray-700">$183K</td><td class="text-gray-700">24%</td><td>3,450</td></tr>
+        <tr class="activity-child" data-activity="rate-disneyland"><td class="pl-6 text-xs italic text-gray-500">6% off — KR/JP/TW/CN/HK</td><td class="text-xs">May–Jul</td><td><span class="text-blue-600 text-xs font-medium">6% off</span></td><td class="text-gray-700">$187K</td><td class="text-gray-700">24%</td><td>1,120</td></tr>
+        <tr class="activity-child" data-activity="rate-disneyland"><td class="pl-6 text-xs italic text-gray-500">LNY Flash — 1D 1Park</td><td class="text-xs">Jan 20–Feb 5</td><td><span class="text-red-600 text-xs font-medium">Flash</span></td><td class="text-gray-700">$118K</td><td class="text-gray-700">15%</td><td>4,100</td></tr>
+        <tr class="activity-child" data-activity="rate-disneyland" data-pkg="386478"><td class="pl-6 text-xs italic text-gray-500">2% off All — 1D 2Parks</td><td class="text-xs">May 6–27</td><td><span class="text-blue-600 text-xs font-medium">2% off</span></td><td class="text-gray-700">$125K</td><td class="text-gray-700">16%</td><td>270</td></tr>
+        <tr class="activity-child" data-activity="rate-disneyland"><td class="pl-6 text-xs italic text-gray-500">Early Bird 15% — 1D 2Parks</td><td class="text-xs">Jan 1–15</td><td><span class="text-red-600 text-xs font-medium">15% off</span></td><td class="text-gray-700">$54K</td><td class="text-gray-700">7%</td><td>210</td></tr>
+        <tr class="activity-child" data-activity="rate-disneyland"><td class="pl-6 text-xs italic text-gray-500">Member Day 10% — 1D 1Park</td><td class="text-xs">Mar 1–31</td><td><span class="text-red-600 text-xs font-medium">10% off</span></td><td class="text-gray-700">$98K</td><td class="text-gray-700">14%</td><td>2,286</td></tr>
+        <tr class="activity-header" data-activity="rate-paris-plus" onclick="toggleActivityRow(this)"><td class="cursor-pointer"><span class="activity-toggle">▼</span> <strong>Disneyland Paris + Experiences</strong></td><td class="text-gray-400">-</td><td class="text-gray-400">-</td><td class="font-bold">$198K</td><td><strong>100%</strong></td><td>1,918</td></tr>
+        <tr class="activity-child" data-activity="rate-paris-plus"><td class="pl-6 text-xs italic text-gray-500">Flash Sale 20% — 1D 2Parks</td><td class="text-xs">Apr 15–22</td><td><span class="text-red-600 text-xs font-medium">20% off</span></td><td class="text-gray-700">$67K</td><td class="text-gray-700">34%</td><td>524</td></tr>
+        <tr class="activity-child" data-activity="rate-paris-plus"><td class="pl-6 text-xs italic text-gray-500">Bundle Save 8% — 1D+Meal</td><td class="text-xs">Feb–Jun</td><td><span class="text-blue-600 text-xs font-medium">8% off</span></td><td class="text-gray-700">$52K</td><td class="text-gray-700">26%</td><td>687</td></tr>
+        <tr class="activity-child" data-activity="rate-paris-plus"><td class="pl-6 text-xs italic text-gray-500">Weekend Special 5% — 1D 2Parks</td><td class="text-xs">May–Aug</td><td><span class="text-blue-600 text-xs font-medium">5% off</span></td><td class="text-gray-700">$41K</td><td class="text-gray-700">21%</td><td>412</td></tr>
+        <tr class="activity-child" data-activity="rate-paris-plus"><td class="pl-6 text-xs italic text-gray-500">Summer Kickoff 12% — 1D 1Park</td><td class="text-xs">Jun 1–15</td><td><span class="text-red-600 text-xs font-medium">12% off</span></td><td class="text-gray-700">$38K</td><td class="text-gray-700">19%</td><td>295</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="flex justify-between items-center mt-3 text-xs text-gray-500">
+      <div id="rate-pagination-info">Showing 1-10 of 12 rows</div>
+      <div class="flex gap-1">
+        <button class="px-2 py-1 border rounded bg-gray-50 text-gray-400 cursor-not-allowed rate-prev-btn" disabled>Prev</button>
+        <button class="px-2 py-1 border rounded bg-klook-orange text-white border-klook-orange rate-page-btn active" data-page="1">1</button>
+        <button class="px-2 py-1 border rounded bg-gray-50 text-gray-500 rate-page-btn" data-page="2">2</button>
+        <button class="px-2 py-1 border rounded bg-gray-50 text-gray-500 rate-next-btn">Next</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec-hd mb-4">🔮 Forward Pacing &amp; Actions</div>
+  <div class="grid grid-cols-2 gap-4 mb-5">
+    <div class="bg-white p-5 rounded-lg shadow-sm">
+      <div class="flex justify-between items-start mb-3">
+        <div><h4 class="font-semibold text-sm text-gray-800">Next 6 Months Pace by Participation Date</h4><div class="text-xs text-gray-400">Confirmed bookings for future travel dates as of today vs. same day last year by <span class="lbl-metric-lower">gross</span> units</div></div>
+      </div>
+      <div id="chart-otb" class="chart-container-sm"></div>
+      <div class="bg-gray-50 p-3 rounded-lg mt-3 text-xs text-gray-700">
+        If you are viewing this report on Jul 27, the bars represent how many bookings you have secured today for upcoming months compared to your standing on Jul 27 last year. For instance, if your Dec "Current" bar is lower than "Last Year," it means you have fewer tickets sold for Dec participation than you did last year Jul 27. This indicates a slowing booking pace, signaling that you should launch a promotion now to fill those future slots before the travel dates actually arrive.
+      </div>
+    </div>
+    <div class="bg-white p-5 rounded-lg shadow-sm">
+      <h4 class="font-semibold text-sm text-gray-800 mb-3">Recommended Actions — Next 30 Days</h4>
+      <div class="action-item action-p0"><div class="text-2xl font-black opacity-10 leading-none flex-shrink-0" style="width:14px">1</div><div><h5 class="text-sm font-bold mb-1">Launch Dec Christmas Campaign NOW</h5><p class="text-xs text-gray-600 leading-relaxed">Dec ▼24% vs LY. Mirror 6% off APAC rate plan — target KR + CN + IN.</p><span class="atag atag-rd">🔴 P0 — Launch within 7 days</span></div></div>
+      <div class="action-item action-p0"><div class="text-2xl font-black opacity-10 leading-none flex-shrink-0" style="width:14px">2</div><div><h5 class="text-sm font-bold mb-1">Enable Free Cancel on Top 2 Packages</h5><p class="text-xs text-gray-600 leading-relaxed">0% free cancel vs compset 45%. Even 24h free cancel would materially lift conversion.</p><span class="atag atag-rd">🔴 P0 — Supply</span></div></div>
+      <div class="action-item action-p1"><div class="text-2xl font-black opacity-10 leading-none flex-shrink-0" style="width:14px">3</div><div><h5 class="text-sm font-bold mb-1">Fix 1D 2Parks+Premier CXL &amp; Refund Rate</h5><p class="text-xs text-gray-600 leading-relaxed">CXL 11.1% (+2.1pp), refund rate 3.8% (+2.4pp). Tighten cut-off and audit voucher delivery.</p><span class="atag atag-or">🟠 P1 — Ops</span></div></div>
+      <div class="action-item action-p2"><div class="text-2xl font-black opacity-10 leading-none flex-shrink-0" style="width:14px">4</div><div><h5 class="text-sm font-bold mb-1">Extend App Exclusive to Q4</h5><p class="text-xs text-gray-600 leading-relaxed">5,400 units at zero cost — highest ROI rate plan. Replicate Oct–Dec.</p><span class="atag atag-yl">🟡 P2 — Campaign</span></div></div>
+    </div>
+  </div>
+
+</div>
+
+<div id="exportModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-[9999] flex justify-center items-center hidden no-print">
+  <div class="bg-white rounded-lg shadow-xl w-[640px] max-h-[85vh] flex flex-col font-sans">
+    <div class="flex justify-between items-center p-4 border-b">
+      <h3 class="text-base font-bold text-gray-800">Export Report to PDF</h3>
+      <button onclick="closeExportModal()" class="text-gray-400 hover:text-gray-600 text-lg">&times;</button>
+    </div>
+    <div class="p-5 overflow-y-auto flex-1">
+      <p class="text-sm text-gray-500 mb-4">Select the modules and charts you want to include in the PDF export.</p>
+      <div id="exportChecklist" class="flex flex-col gap-5"></div>
+    </div>
+    <div class="p-4 border-t flex justify-between items-center bg-gray-50 rounded-b-lg">
+      <button onclick="resetExportModal()" class="px-4 py-2 bg-gray-200 text-gray-700 hover:bg-gray-300 rounded text-sm font-medium transition">Reset</button>
+      <div class="flex gap-2">
+        <button onclick="closeExportModal()" class="px-4 py-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 rounded text-sm font-medium transition">Cancel</button>
+        <button onclick="confirmExportPDF()" class="px-4 py-2 bg-klook-orange hover:bg-orange-700 text-white rounded text-sm font-medium transition">Generate PDF</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════ DATA ═══════════════════════════════ */
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul'];
+const WEEKS = Array.from({length:7},(_,i)=>'W'+(i+1));
+const DAYS  = Array.from({length:7},(_,i)=>'D'+(i+1));
+
+const MONTHLY_SALES = { ly:[40,45,38,44,48,57,52], cy:[42,45,48,55,63,68,65], yoy:[5,0,26,25,31,19,25] };
+const MONTHLY_UNITS = { ly:[47,52,51,57,50,55,48], cy:[42,44,60,57,44,68,58], yoy:[-11,-15,18,0,-12,24,21] };
+
+const ORIG_NAMES   = ['India','S. Korea','HK & Macau','Japan','Singapore','Taiwan','Malaysia','Philippines','Mainland CN','Europe','Mid. East','Others'];
+const ORIG_COLORS  = ['#ff5b00','#e53935','#ff9800','#4caf50','#9c27b0','#00cbd1','#4d40cc','#8d6e63','#e91e63','#546e7a','#fb8c00','#bdbdbd'];
+const ORIG_CY_PCT  = [17,12,11,10,7,6,6,6,6,5,4,4];
+const ORIG_COMP_PCT= [14,22,18,11,5,6,4,5,6,6,4,3];
+const ORIG_SALES_PCT= [19,10,12,11,8,6,7,5,7,5,5,5];
+const ORIG_COMP_SALES_PCT= [16,20,16,12,6,5,5,4,7,6,4,3];
+
+const ORIG_MONTHLY=[
+  [17,18,16,17,17,16,17], [11,10,12,11,12,13,12],
+  [11,11,11,12,11,11,11], [10,9,10,10,10,10,10],
+  [6,6,7,6,6,6,7],        [6,6,6,7,6,6,6],
+  [7,7,6,6,6,6,6],        [6,6,6,6,6,7,6],
+  [7,7,7,7,7,7,7],        [6,6,6,6,6,6,6],
+  [5,5,5,5,5,5,5],        [8,9,8,7,8,7,7],
+];
+// Sales-basis composition — deliberately different mix from ORIG_MONTHLY (unit-basis)
+// so the Unit/Sales toggle visibly changes the stacked chart, not just a relabel.
+const ORIG_MONTHLY_SALES=[
+  [19,20,18,19,20,18,19], [10,9,11,10,9,11,10],
+  [12,12,13,12,12,13,12], [11,11,10,11,11,10,11],
+  [8,8,9,8,8,7,8],        [6,6,7,6,6,6,6],
+  [7,6,7,7,6,7,7],        [5,5,5,5,6,5,5],
+  [7,7,6,7,7,7,7],        [5,5,6,5,5,6,5],
+  [5,5,5,5,5,5,5],        [7,8,7,7,8,7,7],
+];
+
+const BUBBLE_DATA=[
+  [17,24,18,'India'],[12,-8,12,'S. Korea'],[11,14,11,'HK & Macau'],
+  [10,11,10,'Japan'],[7,16,7,'Singapore'],[6,9,6,'Taiwan'],
+  [6,26,6,'Malaysia'],[6,2,6,'Philippines'],[6,29,6,'Mainland CN'],
+  [5,34,5,'Europe'],[4,13,4,'Mid. East'],[4,42,4,'Others'],
+];
+// Sales-basis bubble — same growth/volume, different x (sales share) so toggling is visible.
+const BUBBLE_DATA_SALES=[
+  [19,24,18,'India'],[10,-8,12,'S. Korea'],[12,14,11,'HK & Macau'],
+  [11,11,10,'Japan'],[8,16,7,'Singapore'],[6,9,6,'Taiwan'],
+  [7,26,6,'Malaysia'],[5,2,6,'Philippines'],[7,29,6,'Mainland CN'],
+  [5,34,5,'Europe'],[5,13,4,'Mid. East'],[5,42,4,'Others'],
+];
+
+const GROUP_CATS=['2A (Couple)','1A (Solo)','2A2C','2A1C','4A (Group)','Others'];
+const GROUP_CY=[22,20,20,18,14,6];
+const GROUP_LY=[20,21,18,16,13,7];
+
+const DOW_DAYS=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const DOW_MERCH=[8,7,6,9,18,28,24];
+const DOW_COMP=[9,8,7,10,16,22,28];
+
+const OTB_MONTHS=['Aug','Sep','Oct','Nov','Dec','Jan'];
+const OTB_LY=[4600,4900,5800,3400,4200,3800];
+const OTB_CY=[4400,5300,4400,3100,3300,3500];
+
+const PKG_NAMES = ['1D 2Parks Dated','1D 1Park Dated','Regular 1D 2Parks','MINI Ticket 1D','1D 2Parks+Premier'];
+const PKG_COLORS = ['#ff5b00','#4d40cc','#00cbd1','#e91e63','#546e7a'];
+const PKG_SALES_SERIES = [
+  [74,80,84,90,96,101,88],
+  [62,68,70,74,78,82,72],
+  [48,52,54,58,60,63,55],
+  [34,38,40,42,45,47,42],
+  [16,18,19,21,22,24,20],
+];
+const PKG_UNITS_SERIES = [
+  [730,790,820,880,940,990,860],
+  [640,700,720,760,800,840,740],
+  [500,540,560,600,620,650,570],
+  [400,440,460,480,510,540,480],
+  [150,170,180,200,210,230,190],
+];
+
+/* ═══════════════════════════════ ECHARTS COMMON ═══════════════════════════════ */
+const TT = {
+  backgroundColor:'rgba(15,20,35,0.88)',
+  borderColor:'transparent',
+  textStyle:{color:'#fff',fontSize:11},
+  axisPointer:{type:'cross',crossStyle:{color:'#aaa',width:1}}
+};
+
+const charts={};
+let currentBasis = 'Net';
+let currentComp = 'YoY';
+let salesGran = 'Monthly';
+let unitsGran = 'Monthly';
+let currentDateBasis = 'Booking Date';
+
+function initChart(id, option){
+  const el=document.getElementById(id);
+  if(!el) return null;
+  let c = echarts.getInstanceByDom(el);
+  if (!c) {
+    c = echarts.init(el);
+    new ResizeObserver(()=>c.resize()).observe(el);
+    charts[id]=c;
+  }
+  c.setOption(option, true);
+  return c;
+}
+
+function getXAxisData(gran) {
+  if (gran === 'Daily') return DAYS;
+  if (gran === 'Weekly') return WEEKS;
+  return MONTHS;
+}
+
+/* ═══════════════════════════════ CHARTS ═══════════════════════════════ */
+
+function buildSalesChart(){
+  const xAxisData = getXAxisData(salesGran);
+  const titleMetric = currentBasis;
+  const prev = currentComp === 'PoP' ? 'PP' : 'LY';
+
+  initChart('chart-sales',{
+    tooltip:{...TT,trigger:'axis'},
+    legend:{data:[`${prev} ${titleMetric} Sales`,`Current ${titleMetric} Sales`,`${currentComp}%`],bottom:0,itemWidth:12,itemHeight:8,textStyle:{fontSize:11}},
+    grid:{left:48,right:48,top:16,bottom:56},
+    xAxis:{
+      type:'category',
+      data:xAxisData,
+      axisLabel:{
+        fontSize:10,
+        formatter: function(val, idx) {
+          const y = MONTHLY_SALES.yoy[idx] || 0;
+          if(y === 0) return val + '\n{nu|—}';
+          const sign = y > 0 ? '▲' : '▼';
+          const style = y > 0 ? '{up|' : '{dn|';
+          return val + '\n' + style + sign + Math.abs(y) + '%}';
+        },
+        rich: {
+          up: { color: '#4caf50', fontSize: 10, fontWeight: 'bold' },
+          dn: { color: '#f44336', fontSize: 10, fontWeight: 'bold' },
+          nu: { color: '#9e9e9e', fontSize: 10 }
+        }
+      }
+    },
+    yAxis:[
+      {type:'value',axisLabel:{formatter:v=>v+'K',fontSize:10},splitLine:{lineStyle:{color:'#f0f0f0'}}},
+      {type:'value',axisLabel:{formatter:v=>v+'%',fontSize:10},splitLine:{show:false}}
+    ],
+    series:[
+      {name:`${prev} ${titleMetric} Sales`,type:'bar',data:MONTHLY_SALES.ly,barMaxWidth:28,
+       itemStyle:{color:'#d1d5db'},
+       label:{show:true,position:'top',fontSize:9,color:'#6b7280',formatter:p=>p.value+'K'}},
+      {name:`Current ${titleMetric} Sales`,type:'bar',data:MONTHLY_SALES.cy,barMaxWidth:28,
+       itemStyle:{color:'#ff5b00'},
+       label:{show:true,position:'top',fontSize:9,color:'#ff5b00',formatter:p=>p.value+'K'}},
+      {name:`${currentComp}%`,type:'line',yAxisIndex:1,data:MONTHLY_SALES.yoy,
+       lineStyle:{color:'#4d40cc',width:2},itemStyle:{color:'#4d40cc'},symbol:'circle',symbolSize:5}
+    ]
+  });
+}
+
+function buildUnitsChart(){
+  const xAxisData = getXAxisData(unitsGran);
+  const titleMetric = currentBasis;
+  const prev = currentComp === 'PoP' ? 'PP' : 'LY';
+
+  initChart('chart-units',{
+    tooltip:{...TT,trigger:'axis'},
+    legend:{data:[`${prev} ${titleMetric} Units`,`Current ${titleMetric} Units`,`${currentComp}%`],bottom:0,itemWidth:12,itemHeight:8,textStyle:{fontSize:11}},
+    grid:{left:48,right:48,top:16,bottom:56},
+    xAxis:{
+      type:'category',
+      data:xAxisData,
+      axisLabel:{
+        fontSize:10,
+        formatter: function(val, idx) {
+          const y = MONTHLY_UNITS.yoy[idx] || 0;
+          if(y === 0) return val + '\n{nu|—}';
+          const sign = y > 0 ? '▲' : '▼';
+          const style = y > 0 ? '{up|' : '{dn|';
+          return val + '\n' + style + sign + Math.abs(y) + '%}';
+        },
+        rich: {
+          up: { color: '#4caf50', fontSize: 10, fontWeight: 'bold' },
+          dn: { color: '#f44336', fontSize: 10, fontWeight: 'bold' },
+          nu: { color: '#9e9e9e', fontSize: 10 }
+        }
+      }
+    },
+    yAxis:[
+      {type:'value',axisLabel:{formatter:v=>v+'K',fontSize:10},splitLine:{lineStyle:{color:'#f0f0f0'}}},
+      {type:'value',axisLabel:{formatter:v=>v+'%',fontSize:10},splitLine:{show:false}}
+    ],
+    series:[
+      {name:`${prev} ${titleMetric} Units`,type:'bar',data:MONTHLY_UNITS.ly,barMaxWidth:28,
+       itemStyle:{color:'#d1d5db'},
+       label:{show:true,position:'top',fontSize:9,color:'#6b7280',formatter:p=>p.value+'K'}},
+      {name:`Current ${titleMetric} Units`,type:'bar',data:MONTHLY_UNITS.cy,barMaxWidth:28,
+       itemStyle:{color:'#4d40cc'},
+       label:{show:true,position:'top',fontSize:9,color:'#4d40cc',formatter:p=>p.value+'K'}},
+      {name:`${currentComp}%`,type:'line',yAxisIndex:1,data:MONTHLY_UNITS.yoy,
+       lineStyle:{color:'#ff5b00',width:2},itemStyle:{color:'#ff5b00'},symbol:'circle',symbolSize:5}
+    ]
+  });
+}
+
+function buildOriginShare(){
+  const groupId = 'tg-origin-share';
+  const activeBtn = document.querySelector(`#${groupId} .tg-btn.active`);
+  const isSales = activeBtn && activeBtn.textContent === 'Sales';
+  document.querySelectorAll('.lbl-share-metric').forEach(el => el.textContent = isSales ? 'Sales' : 'Unit');
+  const cyData = isSales ? ORIG_SALES_PCT : ORIG_CY_PCT;
+  const compData = isSales ? ORIG_COMP_SALES_PCT : ORIG_COMP_PCT;
+  const revNames=[...ORIG_NAMES].reverse();
+  const revCy=[...cyData].reverse();
+  const revComp=[...compData].reverse();
+  const showComp = document.body.classList.contains('no-comp') ? false : true;
+  const series=[
+    {name:'Merchant %',type:'bar',data:revCy.map(v=>({value:v,itemStyle:{color:'#ff5b00'}})),barMaxWidth:14,
+     label:{show:true,position:'right',fontSize:9,formatter:p=>p.value+'%'}}
+  ];
+  if(showComp) series.push({name:'Compset %',type:'scatter',data:revComp,symbol:'rect',symbolSize:[3, 16],itemStyle:{color:'#2196f3'},z:10});
+  initChart('chart-origin-share',{
+    tooltip:{...TT,trigger:'axis'},
+    legend:{show:false},
+    grid:{left:80,right:30,top:8,bottom:20},
+    xAxis:{type:'value',axisLabel:{formatter:v=>v+'%',fontSize:10},splitLine:{lineStyle:{color:'#f0f0f0'}}},
+    yAxis:{type:'category',data:revNames,axisLabel:{fontSize:9}},
+    series
+  });
+}
+
+function buildOriginBubble(){
+  const activeBtn = document.querySelector('#tg-origin-bubble .tg-btn.active');
+  const isSales = activeBtn && activeBtn.textContent === 'Sales';
+  document.querySelectorAll('.lbl-bubble-metric').forEach(el => el.textContent = isSales ? 'Sales' : 'Unit');
+  const shareLabel = isSales ? 'Sales Share' : 'Unit Share';
+  const dataset = isSales ? BUBBLE_DATA_SALES : BUBBLE_DATA;
+  initChart('chart-origin-bubble',{
+    tooltip:{
+      ...TT,trigger:'item',
+      formatter:p=>{
+        const d=p.data.value;
+        return `<strong>${d[3]}</strong><br/>${shareLabel}: ${d[0]}%<br/>${currentComp} Growth: ${d[1]}%<br/>Volume Index: ${d[2]}`;
+      }
+    },
+    grid:{left:48,right:16,top:28,bottom:36},
+    xAxis:{type:'value',name:shareLabel,nameTextStyle:{fontSize:9},axisLabel:{formatter:v=>v+'%',fontSize:9},splitLine:{lineStyle:{color:'#f0f0f0'}}},
+    yAxis:{type:'value',name:`${currentComp}%`,nameTextStyle:{fontSize:9},axisLabel:{formatter:v=>v+'%',fontSize:9},splitLine:{lineStyle:{color:'#f0f0f0'}}},
+    series:[{
+      type:'scatter',
+      data:dataset.map((d,i)=>({value:[d[0],d[1],d[2],d[3]],itemStyle:{color:ORIG_COLORS[i],opacity:0.8}})),
+      symbolSize:d=>Math.sqrt(d[2])*9,
+      label:{show:true,formatter:p=>p.data.value[3],fontSize:9,position:'top',color:'#555'}
+    }]
+  });
+}
+
+function buildOriginStacked(){
+  const activeBtn = document.querySelector('#tg-origin-stacked .tg-btn.active');
+  const isSales = activeBtn && activeBtn.textContent === 'Sales';
+  document.querySelectorAll('.lbl-comp-metric').forEach(el => el.textContent = isSales ? 'Sales' : 'Units');
+  const dataset = isSales ? ORIG_MONTHLY_SALES : ORIG_MONTHLY;
+  initChart('chart-origin-stacked',{
+    tooltip:{...TT,trigger:'axis'},
+    legend:{data:ORIG_NAMES,bottom:0,itemWidth:10,itemHeight:8,textStyle:{fontSize:9}},
+    grid:{left:28,right:16,top:8,bottom:90},
+    xAxis:{type:'category',data:MONTHS,axisLabel:{fontSize:10}},
+    yAxis:{type:'value',max:100,axisLabel:{formatter:v=>v+'%',fontSize:10},splitLine:{lineStyle:{color:'#f0f0f0'}}},
+    series:ORIG_NAMES.map((name,i)=>({
+      name,type:'bar',stack:'total',data:dataset[i],
+      itemStyle:{color:ORIG_COLORS[i]},
+      emphasis:{focus:'series'},
+      label:{show:true,position:'inside',fontSize:9,color:'#fff',
+             formatter:p=>p.value>5?p.value+'%':''}
+    }))
+  });
+}
+
+function buildGroupComp(){
+  const revCats=[...GROUP_CATS].reverse();
+  const revCY=[...GROUP_CY].reverse();
+  const revLY=[...GROUP_LY].reverse();
+  const prev = currentComp === 'PoP' ? 'PP' : 'LY';
+  const metricStr = `${currentBasis} Unit`;
+  const compCY = revCY.map(v => v - 1.5);
+  const barWidth = 14;
+  const showComp = !document.body.classList.contains('no-comp');
+  const legendData=[`Current ${metricStr}`,`${prev} ${metricStr}`];
+  const series=[
+    {name:`Current ${metricStr}`,type:'bar',data:revCY,barWidth:barWidth,itemStyle:{color:'#ff5b00'},
+     label:{show:true,position:'right',fontSize:10,formatter:p=>p.value+'%'}},
+    {name:`${prev} ${metricStr}`,type:'bar',data:revLY,barWidth:barWidth,itemStyle:{color:'#d1d5db'},
+     label:{show:true,position:'right',fontSize:9,color:'#9ca3af',formatter:p=>p.value+'%'}}
+  ];
+  if(showComp){
+    legendData.push('Compset');
+    series.push({name:'Compset',type:'scatter',data:compCY.map((v,i)=>[v,i]),symbol:'rect',symbolSize:[3,14],itemStyle:{color:'#2196f3'},z:10});
+  }
+  initChart('chart-group-comp',{
+    tooltip:{...TT,trigger:'axis'},
+    legend:{data:legendData,bottom:0,itemWidth:10,itemHeight:8,textStyle:{fontSize:10}},
+    grid:{left:76,right:56,top:8,bottom:36},
+    xAxis:{type:'value',axisLabel:{formatter:v=>v+'%',fontSize:10},splitLine:{lineStyle:{color:'#f0f0f0'}}},
+    yAxis:{type:'category',data:revCats,axisLabel:{fontSize:10}},
+    series
+  });
+  const prevLbl=document.querySelector('.lbl-prev');
+  if(prevLbl) prevLbl.textContent=prev;
+}
+
+function buildDOW(){
+  const showComp = !document.body.classList.contains('no-comp');
+  const legendData=['Merchant'];
+  const series=[
+    {name:'Merchant',type:'bar',data:DOW_MERCH,barMaxWidth:22,itemStyle:{color:'#ff5b00'},
+     label:{show:true,position:'top',fontSize:9,color:'#ff5b00',formatter:p=>p.value+'%'}}
+  ];
+  if(showComp){
+    legendData.push('Compset');
+    series.push({name:'Compset',type:'bar',data:DOW_COMP,barMaxWidth:22,itemStyle:{color:'rgba(33,150,243,0.6)'},
+     label:{show:true,position:'top',fontSize:9,color:'#1565c0',formatter:p=>p.value+'%'}});
+  }
+  initChart('chart-dow',{
+    tooltip:{...TT,trigger:'axis'},
+    legend:{data:legendData,bottom:0,itemWidth:10,itemHeight:8,textStyle:{fontSize:10}},
+    grid:{left:36,right:16,top:16,bottom:36},
+    xAxis:{type:'category',data:DOW_DAYS,axisLabel:{fontSize:10}},
+    yAxis:{type:'value',axisLabel:{formatter:v=>v+'%',fontSize:10},splitLine:{lineStyle:{color:'#f0f0f0'}}},
+    series
+  });
+}
+
+function buildOverallWindow() {
+  const cats = ['30D+', '8–30 Days', '4–7 Days', '1–3 Days', 'Same Day (0D)'];
+  const merch = [8, 13, 12, 35, 32];
+  const comp = [9, 16, 14, 33, 28];
+  const colors = ['#e0e0e0', '#ffccbc', '#ffa726', '#ff8a65', '#ff5b00'];
+  const showComp = !document.body.classList.contains('no-comp');
+
+  const series = [
+    {
+      name: 'Merchant', type: 'bar',
+      data: merch.map((v, i) => ({ value: v, itemStyle: { color: colors[i], borderRadius: [0, 4, 4, 0] } })),
+      barMaxWidth: 8,
+      label: { show: true, position: 'right', formatter: '{c}%', fontSize: 11, color: '#333' },
+      legendIcon: 'rect', legendItemWidth: 10, legendItemHeight: 10
+    }
+  ];
+  if(showComp){
+    series.push({
+      name: 'Compset', type: 'scatter', data: comp, symbol: 'rect', symbolSize: [3, 14],
+      itemStyle: { color: '#2196f3' }, z: 10, legendIcon: 'rect', legendItemWidth: 3, legendItemHeight: 14
+    });
+  }
+
+  initChart('chart-overall-window',{
+    tooltip: { ...TT, trigger: 'axis' },
+    legend: { data: showComp ? ['Merchant','Compset'] : ['Merchant'], bottom: 0, itemWidth: 12, itemHeight: 12, textStyle: { fontSize: 11, color: '#666' }, selector: false },
+    grid: { left: 95, right: 30, top: 10, bottom: 36 },
+    xAxis: { type: 'value', axisLabel: { show: false }, splitLine: { show: false }, max: 40 },
+    yAxis: { type: 'category', data: cats, axisLine: {show:false}, axisTick: {show:false}, axisLabel: {fontSize:11, color:'#666'} },
+    series
+  });
+  const sub = document.querySelector('.comp-window-sub');
+  if(sub) sub.textContent = showComp ? 'Merchant vs Compset · blue = compset' : 'Merchant';
+}
+
+function buildTimeslot(){
+  const HOURS=['8:00','9:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00'];
+  const TS_MERCH=[3,5,12,18,14,11,9,8,7,5,4,2,2];
+  const TS_COMP=[2,4,10,14,15,14,12,9,7,5,4,3,1];
+  const showComp = !document.body.classList.contains('no-comp');
+  const legendData=['Merchant'];
+  const series=[
+    {name:'Merchant',type:'bar',data:TS_MERCH,barMaxWidth:16,itemStyle:{color:'#ff5b00'},
+     label:{show:true,position:'top',fontSize:8,color:'#ff5b00',formatter:p=>p.value+'%'}}
+  ];
+  if(showComp){
+    legendData.push('Compset');
+    series.push({name:'Compset',type:'bar',data:TS_COMP,barMaxWidth:16,itemStyle:{color:'#64b5f6'},
+     label:{show:true,position:'top',fontSize:8,color:'#0288d1',formatter:p=>p.value+'%'}});
+  }
+  initChart('chart-timeslot',{
+    tooltip:{...TT,trigger:'axis'},
+    legend:{data:legendData,bottom:0,itemWidth:10,itemHeight:8,textStyle:{fontSize:10}},
+    grid:{left:36,right:16,top:16,bottom:44},
+    xAxis:{type:'category',data:HOURS,axisLabel:{fontSize:9,rotate:35}, axisTick:{alignWithLabel:true}},
+    yAxis:{type:'value',axisLabel:{formatter:v=>v+'%',fontSize:10},splitLine:{lineStyle:{color:'#f0f0f0'}}},
+    series
+  });
+}
+
+function buildOTB(){
+  const prev = currentComp === 'PoP' ? 'PP' : 'LY';
+  initChart('chart-otb',{
+    tooltip:{...TT,trigger:'axis'},
+    legend:{data:[`${prev} Pace`,'CY OTB'],bottom:0,itemWidth:10,itemHeight:8,textStyle:{fontSize:10}},
+    grid:{left:48,right:16,top:16,bottom:36},
+    xAxis:{type:'category',data:OTB_MONTHS,axisLabel:{fontSize:10}},
+    yAxis:{type:'value',axisLabel:{formatter:v=>(v/1000).toFixed(1)+'K',fontSize:10},splitLine:{lineStyle:{color:'#f0f0f0'}}},
+    series:[
+      {name:`${prev} Pace`,type:'bar',data:OTB_LY,barMaxWidth:26,itemStyle:{color:'#d1d5db'},
+       label:{show:true,position:'top',fontSize:9,color:'#6b7280',formatter:p=>(p.value/1000).toFixed(1)+'K'}},
+      {name:'CY OTB',type:'bar',data:OTB_CY,barMaxWidth:26,itemStyle:{color:'#ff5b00'},
+       label:{show:true,position:'top',fontSize:9,color:'#ff5b00',formatter:p=>(p.value/1000).toFixed(1)+'K'}}
+    ]
+  });
+}
+
+const pkgComparisonState = {
+  pkgsales: { topN: 5, gran: 'Monthly' },
+  pkgunits: { topN: 5, gran: 'Monthly' },
+};
+
+function buildPkgComparison(which, gran){
+  const state = pkgComparisonState[which];
+  if (gran) state.gran = gran;
+  const series = which === 'pkgsales' ? PKG_SALES_SERIES : PKG_UNITS_SERIES;
+  const n = Math.max(1, Math.min(5, state.topN));
+  const xAxisData = state.gran === 'Daily' ? DAYS : state.gran === 'Weekly' ? WEEKS : MONTHS;
+  const chartId = which === 'pkgsales' ? 'chart-pkg-sales-comp' : 'chart-pkg-units-comp';
+  const suffix = which === 'pkgsales' ? 'K' : '';
+  initChart(chartId, {
+    tooltip:{...TT,trigger:'item'},
+    legend:{data:PKG_NAMES.slice(0,n),bottom:0,itemWidth:10,itemHeight:8,textStyle:{fontSize:9}},
+    grid:{left:44,right:16,top:16,bottom:56},
+    xAxis:{type:'category',data:xAxisData,axisLabel:{fontSize:10}},
+    yAxis:{type:'value',axisLabel:{formatter:v=>v+suffix,fontSize:10},splitLine:{lineStyle:{color:'#f0f0f0'}}},
+    series: PKG_NAMES.slice(0,n).map((name,i)=>({
+      name, type:'line', data: series[i], smooth:false,
+      lineStyle:{color:PKG_COLORS[i],width:2}, itemStyle:{color:PKG_COLORS[i]}, symbol:'circle', symbolSize:4
+    }))
+  });
+}
+
+function stepTopN(which, delta){
+  const state = pkgComparisonState[which];
+  state.topN = Math.max(1, Math.min(5, state.topN + delta));
+  document.getElementById(`${which}-topn`).value = state.topN;
+  const label = document.getElementById(`${which}-dd-label`);
+  if(label) label.textContent = `${state.topN} selected`;
+  buildPkgComparison(which);
+}
+
+// TOP N stepper: the +/- buttons stay hidden until the box itself is clicked
+// (not on hover), and clicking anywhere else closes them again.
+function toggleStepperReveal(which, e){
+  e.stopPropagation();
+  const stepper = document.getElementById(`${which}-stepper`);
+  const buttons = stepper.querySelectorAll('.stepper-btn');
+  const isRevealed = buttons[0].style.display !== 'none';
+  document.querySelectorAll('.stepper-btn').forEach(b => b.style.display = 'none');
+  buttons.forEach(b => b.style.display = isRevealed ? 'none' : 'inline-flex');
+}
+
+function refreshAllCharts() {
+  buildSalesChart();
+  buildUnitsChart();
+  buildOriginShare();
+  buildOriginBubble();
+  buildOriginStacked();
+  buildGroupComp();
+  buildDOW();
+  buildOverallWindow();
+  buildTimeslot();
+  buildOTB();
+  buildPkgComparison('pkgsales');
+  buildPkgComparison('pkgunits');
+}
+
+window.addEventListener('DOMContentLoaded',()=>{
+  refreshAllCharts();
+  initPagination('msc');
+  initPagination('psc');
+  initPagination('supply');
+  initPagination('inventory');
+  initPagination('rate');
+});
+
+/* ═══════════════════════════════ AI INSIGHT GENERATE FLOWS (demo-only; real dashboard calls an LLM) ═══════════════════════════════ */
+function generateGlobalInsights(isRegenerate){
+  document.getElementById('gi-empty').style.display='none';
+  document.getElementById('gi-generated').style.display='none';
+  document.getElementById('gi-loading').style.display='flex';
+  setTimeout(()=>{
+    document.getElementById('gi-loading').style.display='none';
+    document.getElementById('gi-generated').style.display='block';
+    document.getElementById('gi-regen-btn').style.display='inline-block';
+  }, isRegenerate ? 900 : 1400);
+}
+
+function generateReviewInsights(isRegenerate){
+  document.getElementById('ari-empty').style.display='none';
+  document.getElementById('ari-generated').style.display='none';
+  document.getElementById('ari-loading').style.display='flex';
+  setTimeout(()=>{
+    document.getElementById('ari-loading').style.display='none';
+    document.getElementById('ari-generated').style.display='block';
+    document.getElementById('ari-regen-btn').style.display='inline-block';
+  }, isRegenerate ? 900 : 1400);
+}
+
+/* ═══════════════════════════════ FILTER UI & LINKAGE ═══════════════════════════════ */
+function applyFilters() {
+  currentComp = document.querySelector('#tg-comp .active').innerText;
+  currentBasis = document.querySelector('#tg-metric .active').innerText;
+  currentDateBasis = document.querySelector('#tg-basis .active').innerText;
+  const showComp = document.querySelector('#tg-showcomp .active').innerText === 'Show';
+
+  document.querySelectorAll('.lbl-comp').forEach(el => el.innerText = currentComp);
+  document.querySelectorAll('.lbl-comp-upper').forEach(el => el.innerText = currentComp.toUpperCase());
+  document.querySelectorAll('.lbl-metric-cap').forEach(el => el.innerText = currentBasis);
+  document.querySelectorAll('.lbl-metric-lower').forEach(el => el.innerText = currentBasis.toLowerCase());
+  document.querySelectorAll('.lbl-datebasis').forEach(el => el.innerText = currentDateBasis);
+
+  // Show/Hide Comp Set only takes effect once Apply Filters is clicked — matches
+  // the real dashboard, where toggling the filter alone just updates the draft state.
+  document.body.classList.toggle('no-comp', !showComp);
+
+  refreshAllCharts();
+}
+
+function setTG(btn,groupId){
+  document.querySelectorAll(`#${groupId} .tg-btn`).forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+
+  if(groupId === 'tg-gran-sales'){
+    const txt = btn.textContent;
+    salesGran = txt === 'D' ? 'Daily' : txt === 'W' ? 'Weekly' : 'Monthly';
+    buildSalesChart();
+  }
+  if(groupId === 'tg-gran-units'){
+    const txt = btn.textContent;
+    unitsGran = txt === 'D' ? 'Daily' : txt === 'W' ? 'Weekly' : 'Monthly';
+    buildUnitsChart();
+  }
+}
+
+function toggleMs(ddId){
+  const dd=document.getElementById(ddId);
+  if(!dd) return;
+  const isOpen=dd.classList.contains('open');
+  document.querySelectorAll('.ms-dropdown.open').forEach(d=>d.classList.remove('open'));
+  document.querySelectorAll('.pkg-dd-menu.open').forEach(d=>d.classList.remove('open'));
+  if(!isOpen) dd.classList.add('open');
+}
+
+function filterMsSearch(input,ddId){
+  const q=input.value.toLowerCase();
+  document.querySelectorAll(`#${ddId} .ms-item`).forEach(item=>{
+    item.style.display=item.textContent.toLowerCase().includes(q)?'':'none';
+  });
+}
+
+function toggleMsAll(e,ddId,cbClass,allId,labelId){
+  const allCb=document.getElementById(allId);
+  if(!allCb) return;
+  // Clicking the checkbox itself already toggled it natively (browser default) — only
+  // flip it ourselves when the click landed elsewhere in the row (label/padding/etc),
+  // otherwise a click right on the box would toggle twice and appear to do nothing.
+  const newState = e.target===allCb ? allCb.checked : !allCb.checked;
+  allCb.checked=newState;
+  document.querySelectorAll(`.${cbClass}`).forEach(cb=>cb.checked=newState);
+  const label=document.getElementById(labelId);
+  if(label) label.textContent=newState?'All':'None selected';
+}
+
+function toggleMsItem(e,item,cbClass,allId,labelId){
+  const cb=item.querySelector('input[type=checkbox]');
+  if(cb && e.target!==cb) cb.checked=!cb.checked;
+  const all=document.querySelectorAll(`.${cbClass}`);
+  const checked=Array.from(all).filter(c=>c.checked);
+  const allCb=document.getElementById(allId);
+  if(allCb) allCb.checked=checked.length===all.length;
+  const label=document.getElementById(labelId);
+  if(!label) return;
+  if(checked.length===0) label.textContent='None';
+  else if(checked.length===all.length) label.textContent='All';
+  else if(checked.length===1) label.textContent=checked[0].value;
+  else label.textContent=checked.length+' selected';
+}
+
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.ms-wrap')) document.querySelectorAll('.ms-dropdown.open').forEach(d=>d.classList.remove('open'));
+  if(!e.target.closest('.pkg-dd-wrap')) document.querySelectorAll('.pkg-dd-menu.open').forEach(d=>d.classList.remove('open'));
+  if(!e.target.closest('.stepper')) document.querySelectorAll('.stepper-btn').forEach(b=>b.style.display='none');
+});
+
+/* ═══════════════════════════════ PACKAGE / TREE-TABLE FILTERS ═══════════════════════════════ */
+function togglePkgDd(ddId){
+  const dd=document.getElementById(ddId);
+  if(!dd) return;
+  const isOpen=dd.classList.contains('open');
+  document.querySelectorAll('.pkg-dd-menu.open').forEach(d=>d.classList.remove('open'));
+  if(!isOpen) dd.classList.add('open');
+}
+
+function toggleActivityRow(headerRow){
+  const activity = headerRow.dataset.activity;
+  const isCollapsed = headerRow.classList.contains('collapsed');
+  const children = document.querySelectorAll(`.activity-child[data-activity="${activity}"]`);
+
+  if(isCollapsed){
+    headerRow.classList.remove('collapsed');
+    children.forEach(child => child.classList.remove('hidden'));
+  } else {
+    headerRow.classList.add('collapsed');
+    children.forEach(child => child.classList.add('hidden'));
+  }
+}
+
+function filterTreeTable(el, tableId, cbClass, ddLabelId, allLabel){
+  const table=document.getElementById(tableId);
+  const label=document.getElementById(ddLabelId);
+  const allCb=table ? document.querySelector(`#${ddLabelId}`).parentElement.querySelector('input[id$="-all"]') : null;
+  const cbs=document.querySelectorAll(`.${cbClass}`);
+
+  if(el.id.endsWith('-all')){
+    cbs.forEach(cb=>cb.checked=el.checked);
+  } else {
+    const allSelector = document.querySelector(`#${cbClass.replace('-cb','')}-all`);
+    const checked=[...cbs].filter(cb=>cb.checked);
+    if(allSelector) allSelector.checked = checked.length===cbs.length;
+  }
+
+  const selected=Array.from(cbs).filter(cb=>cb.checked).map(cb=>cb.dataset.pkg);
+  table.querySelectorAll('tbody tr[data-pkg]').forEach(row=>{
+    row.style.display=(selected.length===0||selected.includes(row.dataset.pkg))?'':'none';
+  });
+  if(label){
+    if(selected.length===0) label.textContent='None';
+    else if(selected.length===cbs.length) label.textContent=allLabel;
+    else label.textContent=selected.length+' selected';
+  }
+  document.querySelectorAll('.pkg-dd-menu.open').forEach(d=>d.classList.remove('open'));
+  updatePagination(tableId.replace('-table',''));
+}
+
+/* ═══════════════════════════════ PAGINATION ═══════════════════════════════ */
+const ROWS_PER_PAGE = 10;
+
+function updatePagination(tableType) {
+  const table = document.getElementById(`${tableType}-table`);
+  const infoEl = document.getElementById(`${tableType}-pagination-info`);
+  const prevBtn = document.querySelector(`.${tableType}-prev-btn`);
+  const nextBtn = document.querySelector(`.${tableType}-next-btn`);
+  const pageBtns = document.querySelectorAll(`.${tableType}-page-btn`);
+
+  if (!table || !infoEl) return;
+
+  const visibleRows = Array.from(table.querySelectorAll('tbody tr')).filter(row => row.style.display !== 'none');
+  const totalRows = visibleRows.length;
+  const totalPages = Math.ceil(totalRows / ROWS_PER_PAGE) || 1;
+
+  let currentPage = 1;
+  pageBtns.forEach(btn => {
+    if (btn.classList.contains('active')) {
+      currentPage = parseInt(btn.dataset.page) || 1;
+    }
+  });
+
+  if (currentPage > totalPages) currentPage = totalPages;
+
+  const startRow = Math.min((currentPage - 1) * ROWS_PER_PAGE + 1, totalRows + 1);
+  const endRow = Math.min(currentPage * ROWS_PER_PAGE, totalRows);
+
+  infoEl.textContent = totalRows === 0 ? 'Showing 0 of 0 rows' : `Showing ${startRow}-${endRow} of ${totalRows} rows`;
+
+  if (prevBtn) {
+    prevBtn.disabled = currentPage <= 1;
+    prevBtn.classList.toggle('cursor-not-allowed', currentPage <= 1);
+    prevBtn.classList.toggle('text-gray-400', currentPage <= 1);
+  }
+  if (nextBtn) {
+    nextBtn.disabled = currentPage >= totalPages;
+    nextBtn.classList.toggle('cursor-not-allowed', currentPage >= totalPages);
+    nextBtn.classList.toggle('text-gray-400', currentPage >= totalPages);
+  }
+  pageBtns.forEach(btn => {
+    const page = parseInt(btn.dataset.page);
+    btn.style.display = page > totalPages ? 'none' : '';
+  });
+  visibleRows.forEach((row, idx) => {
+    const pageNum = Math.floor(idx / ROWS_PER_PAGE) + 1;
+    row.style.display = (pageNum === currentPage) ? '' : 'none';
+  });
+}
+
+function goToPage(tableType, page) {
+  const table = document.getElementById(`${tableType}-table`);
+  if (!table) return;
+  const visibleRows = Array.from(table.querySelectorAll('tbody tr')).filter(row => row.style.display !== 'none');
+  const totalRows = visibleRows.length;
+  const totalPages = Math.ceil(totalRows / ROWS_PER_PAGE) || 1;
+  if (page < 1 || page > totalPages) return;
+
+  const pageBtns = document.querySelectorAll(`.${tableType}-page-btn`);
+  pageBtns.forEach(btn => {
+    btn.classList.remove('active','bg-klook-orange','text-white');
+    btn.classList.add('bg-gray-50','text-gray-700');
+    if (parseInt(btn.dataset.page) === page) {
+      btn.classList.add('active','bg-klook-orange','text-white');
+      btn.classList.remove('bg-gray-50','text-gray-700');
+    }
+  });
+  updatePagination(tableType);
+}
+
+function initPagination(tableType) {
+  const table = document.getElementById(`${tableType}-table`);
+  const infoEl = document.getElementById(`${tableType}-pagination-info`);
+  if (!table || !infoEl) return;
+  const paginationContainer = infoEl.parentElement;
+
+  const visibleRows = Array.from(table.querySelectorAll('tbody tr')).filter(row => row.style.display !== 'none');
+  const totalRows = visibleRows.length;
+  const totalPages = Math.ceil(totalRows / ROWS_PER_PAGE) || 1;
+
+  paginationContainer.querySelectorAll(`.${tableType}-page-btn`).forEach(btn => {
+    if(parseInt(btn.dataset.page) > 1) btn.remove();
+  });
+
+  const nextBtn = paginationContainer.querySelector(`.${tableType}-next-btn`);
+  for (let i = 2; i <= totalPages && i <= 5; i++) {
+    const pageBtn = document.createElement('button');
+    pageBtn.className = `px-2 py-1 border rounded bg-gray-50 text-gray-700 hover:bg-gray-100 ${tableType}-page-btn`;
+    pageBtn.dataset.page = i;
+    pageBtn.textContent = i;
+    pageBtn.onclick = () => goToPage(tableType, i);
+    if (nextBtn) nextBtn.before(pageBtn);
+  }
+  updatePagination(tableType);
+}
+
+/* ═══════════════════════════════ EXPORT MODAL ═══════════════════════════════ */
+const EXPORT_MODULES = [
+  { title: 'Global AI Insights', items: ['Global AI Insights'] },
+  { title: 'Sales Overview', items: ['Net Sales', 'Net Units', 'Review Score'] },
+  { title: 'Sales Trend', items: ['Net Sales (YoY)', 'Net Units (YoY)'] },
+  { title: 'Origin Analysis', items: ['Unit Share by Origin', 'Sales Composition by Origin', 'Origin YoY Breakdown'] },
+  { title: 'User Booking Behavior', items: ['Booking Window by Origin', 'Overall Window', 'Group Composition', 'Day of Week', 'Timeslot Distribution'] },
+  { title: 'Merchant, Activity and Package Detail Breakdown', items: ['Merchant Sales Contribution', 'Package Sales Contribution', 'Package Sales Comparison', 'Package Units Comparison'] },
+  { title: 'Review Insights — Last 90 Days', items: ['Review Score Overview', 'AI Review Insights'] },
+  { title: 'Supply Health', items: ['Supply Health by Package', 'Supply Inventory by Package'] },
+  { title: 'Promotion & Rate Plan', items: ['Rate Plan Performance'] },
+  { title: 'Forward Pacing & Actions', items: ['Next 6 Months Pace (OTB)', 'Recommended Actions'] },
+];
+
+function openExportModal() {
+  const listContainer = document.getElementById('exportChecklist');
+  listContainer.innerHTML = '';
+  EXPORT_MODULES.forEach((mod, modIdx) => {
+    const modId = `mod-cb-${modIdx}`;
+    const modDiv = document.createElement('div');
+    modDiv.className = 'flex flex-col gap-2';
+    let parentHtml = `
+      <label class="font-bold text-sm text-gray-800 flex items-center gap-2 cursor-pointer select-none">
+        <input type="checkbox" id="${modId}" class="w-4 h-4 accent-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer" checked onchange="toggleExportModule(this, '${modId}-children')">
+        ${mod.title}
+      </label>`;
+    let childrenHtml = `<div id="${modId}-children" class="flex flex-col gap-2 ml-6">`;
+    mod.items.forEach(item => {
+      childrenHtml += `
+        <label class="text-sm text-gray-700 flex items-center gap-2 cursor-pointer select-none">
+          <input type="checkbox" class="w-4 h-4 accent-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer child-of-${modId}" checked onchange="updateExportModuleParent('${modId}')">
+          ${item}
+        </label>`;
+    });
+    childrenHtml += `</div>`;
+    modDiv.innerHTML = parentHtml + childrenHtml;
+    listContainer.appendChild(modDiv);
+  });
+  document.getElementById('exportModal').classList.remove('hidden');
+}
+
+function closeExportModal() {
+  document.getElementById('exportModal').classList.add('hidden');
+}
+
+function toggleExportModule(parentCb, childrenContainerId) {
+  document.getElementById(childrenContainerId).querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = parentCb.checked);
+}
+
+function updateExportModuleParent(parentId) {
+  const parentCb = document.getElementById(parentId);
+  const children = document.querySelectorAll(`.child-of-${parentId}`);
+  const allChecked = Array.from(children).every(cb => cb.checked);
+  const someChecked = Array.from(children).some(cb => cb.checked);
+  parentCb.checked = allChecked;
+  parentCb.indeterminate = someChecked && !allChecked;
+}
+
+function resetExportModal() {
+  document.getElementById('exportChecklist').querySelectorAll('input[type="checkbox"]').forEach(cb => {
+    cb.checked = true;
+    cb.indeterminate = false;
+  });
+}
+
+function confirmExportPDF() {
+  alert('Generating PDF with selected modules... (demo)');
+  closeExportModal();
+}
+</script>
+</body>
+</html>
